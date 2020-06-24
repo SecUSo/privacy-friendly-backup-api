@@ -4,7 +4,7 @@ import androidx.annotation.IntDef
 
 object PfaApi {
 
-    const val ACTION = "org.secuso.privacyfriendlybackup.api.PFAAuthService"
+    const val CONNECT_ACTION = "org.secuso.privacyfriendlybackup.api.PFAAuthService"
 
     @IntDef(MSG_AUTHENTICATE, MSG_BACKUP, MSG_RESTORE)
     @Retention(AnnotationRetention.SOURCE)
