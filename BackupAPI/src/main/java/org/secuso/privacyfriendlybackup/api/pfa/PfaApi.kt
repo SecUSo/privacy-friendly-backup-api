@@ -1,36 +1,76 @@
 package org.secuso.privacyfriendlybackup.api.pfa
 
-import androidx.annotation.IntDef
+import android.os.Parcel
+import android.os.Parcelable
+
+
+data class PfaError(
+    val code : PfaErrorCode,
+    val errorMessage : String?
+) : Parcelable {
+
+    enum class PfaErrorCode {
+        INTENT_ERROR,
+        AUTHENTICATION_ERROR,
+        API_VERSION_UNSUPPORTED,
+        ACTION_ERROR,
+        SERVICE_NOT_BOUND,
+        GENERAL_ERROR
+    }
+
+    constructor(parcel: Parcel) : this(PfaErrorCode.values()[parcel.readInt()], parcel.readString())
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeInt(code.ordinal)
+        parcel.writeString(errorMessage)
+    }
+
+    override fun describeContents(): Int  = 0
+
+    companion object CREATOR : Parcelable.Creator<PfaError> {
+        override fun createFromParcel(parcel: Parcel): PfaError {
+            return PfaError(parcel)
+        }
+
+        override fun newArray(size: Int): Array<PfaError?> {
+            return arrayOfNulls(size)
+        }
+    }
+}
+
+// Result Code Action
+const val RESULT_CODE = "RESULT_CODE"
+// Result Codes
+const val RESULT_CODE_ERROR = 0
+const val RESULT_CODE_SUCCESS = 1
+/**
+ * If RESULT_CODE is RESULT_CODE_ERROR then the error can be retrieved from RESULT_ERROR
+ */
+const val RESULT_ERROR = "RESULT_ERROR"
+
+// Extras
+const val EXTRA_API_VERSION = "EXTRA_API_VERSION"
 
 object PfaApi {
+    // API Version
+    const val API_VERSION = 1
 
-    const val CONNECT_ACTION = "org.secuso.privacyfriendlybackup.api.PFAAuthService"
+    // Connect Actions
+    const val PFA_CONNECT_ACTION = "org.secuso.privacyfriendlybackup.api.PFAAuthService"
 
-    @IntDef(MSG_AUTHENTICATE, MSG_BACKUP, MSG_RESTORE)
-    @Retention(AnnotationRetention.SOURCE)
-    annotation class MessageCodes
+    const val EXTRA_CONNECT_PACKAGE_NAME = "PfaApi.EXTRA_CONNECT_PACKAGE_NAME"
 
-    const val MSG_AUTHENTICATE = 1
-    const val MSG_BACKUP = 2
-    const val MSG_RESTORE = 3
+    // Command Actions
+    const val ACTION_BACKUP = "PfaApi.ACTION_BACKUP"
+    const val ACTION_RESTORE = "PfaApi.ACTION_RESTORE"
+}
 
+object BackupApi {
+    // API Version
+    const val API_VERSION = 1
 
-    @IntDef(REPLY_AUTHENTICATION_OK, REPLY_AUTHENTICATION_ERROR, REPLY_NOT_AUTHENTICATED)
-    @Retention(AnnotationRetention.SOURCE)
-    annotation class MessageReplyCodes
+    // Connect Actions
+    const val BACKUP_CONNECT_ACTION = "org.secuso.privacyfriendlybackup.services.BackupService"
 
-    const val REPLY_AUTHENTICATION_OK = 127
-    /**
-     * If this error is sent, the arg1 in the Message will dictate the specific error code
-     */
-    const val REPLY_AUTHENTICATION_ERROR = 128
-    const val REPLY_NOT_AUTHENTICATED = 129
-
-
-    @IntDef(ERROR_AUTH_CERT_MISMATCH, ERROR_AUTH_APPLICATION_NOT_FOUND)
-    @Retention(AnnotationRetention.SOURCE)
-    annotation class MessageReplyErrorCodes
-
-    const val ERROR_AUTH_CERT_MISMATCH = 1
-    const val ERROR_AUTH_APPLICATION_NOT_FOUND = 2
+    // Command Actions
 }

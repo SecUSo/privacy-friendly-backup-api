@@ -1,25 +1,17 @@
 package org.secuso.privacyfriendlybackup.api.pfa
 
-import android.app.Service
-import android.content.Context
 import android.content.Intent
-import android.os.*
 import org.secuso.privacyfriendlybackup.api.IPFAService
-import org.secuso.privacyfriendlybackup.api.pfa.PfaApi.ERROR_AUTH_CERT_MISMATCH
-import org.secuso.privacyfriendlybackup.api.pfa.PfaApi.MSG_AUTHENTICATE
-import org.secuso.privacyfriendlybackup.api.pfa.PfaApi.MSG_BACKUP
-import org.secuso.privacyfriendlybackup.api.pfa.PfaApi.MSG_RESTORE
-import org.secuso.privacyfriendlybackup.api.pfa.PfaApi.REPLY_AUTHENTICATION_ERROR
-import org.secuso.privacyfriendlybackup.api.pfa.PfaApi.REPLY_AUTHENTICATION_OK
-import org.secuso.privacyfriendlybackup.api.pfa.PfaApi.REPLY_NOT_AUTHENTICATED
-import org.secuso.privacyfriendlybackup.api.util.AuthenticationUtil
+import org.secuso.privacyfriendlybackup.api.pfa.PfaApi.ACTION_BACKUP
+import org.secuso.privacyfriendlybackup.api.pfa.PfaApi.ACTION_RESTORE
+import org.secuso.privacyfriendlybackup.api.pfa.PfaApi.EXTRA_CONNECT_PACKAGE_NAME
 
 /**
  * This class is meant to be extended by the PFA. Also it should then be included in the PFA's
  * AndroidManifest.xml file.
  *
  * <pre>
- *     {@code
+ * {@code
  *      <service
  *           android:name=".PFAAuthService"
  *           android:enabled="true"
@@ -35,65 +27,47 @@ import org.secuso.privacyfriendlybackup.api.util.AuthenticationUtil
  *
  * @author Christopher Beckmann
  */
-abstract class PFAAuthService : Service() {
-    private lateinit var mMessenger: Messenger
+abstract class PFAAuthService : AbstractAuthService() {
 
-    private val mBinder : IPFAService.Stub = object : IPFAService.Stub() {
+    override val SUPPORTED_API_VERSIONS = listOf(1)
 
-        override fun execute(data: Intent?): Intent {
+    override val mBinder : IPFAService.Stub = object : IPFAService.Stub()  {
+
+        override fun send(data: Intent?): Intent {
+            val result = canAccess(data)
+            if(result != null) {
+                return result
+            }
+            // data can not be null here else canAccess(Intent) would have returned an error
+            return handle(data!!)
+        }
+
+        private fun handle(data: Intent): Intent {
+            return when(data.action) {
+                ACTION_BACKUP -> handleBackup(data)
+                ACTION_RESTORE -> handleRestore(data)
+                else -> Intent().apply {
+                    putExtra(RESULT_CODE, RESULT_CODE_ERROR)
+                    putExtra(RESULT_ERROR, PfaError(PfaError.PfaErrorCode.ACTION_ERROR, "Action ${data.action} is unsupported."))
+                }
+            }
+        }
+
+        private fun handleBackup(data: Intent): Intent {
             TODO("Not yet implemented")
         }
 
-    }
-
-    internal class PFAHandler(val context: Context,
-                              val applicationContext : Context = context.applicationContext) : Handler() {
-
-        val mAuthenticatedIds : MutableSet<Int> = HashSet()
-
-        override fun handleMessage(msg: Message) {
-            when (msg.what) {
-                MSG_AUTHENTICATE -> handleAuthentication(msg)
-                MSG_BACKUP -> handleBackup(msg)
-                MSG_RESTORE -> handleRestore(msg)
-                else -> super.handleMessage(msg)
-            }
+        private fun handleRestore(data: Intent): Intent {
+            TODO("Not yet implemented")
         }
 
-        private fun handleAuthentication(msg : Message) {
-            if(AuthenticationUtil.authenticate(applicationContext, msg.sendingUid)) {
-                mAuthenticatedIds.add(msg.sendingUid)
-                msg.replyTo.send(Message.obtain(null, REPLY_AUTHENTICATION_OK, 0, 0))
-            } else {
-                msg.replyTo.send(Message.obtain(null, REPLY_AUTHENTICATION_ERROR, ERROR_AUTH_CERT_MISMATCH, 0))
+        private fun successIntent(data : Intent) : Intent {
+            // TODO: do something with this?
+            val backupPackageName = data.getStringExtra(EXTRA_CONNECT_PACKAGE_NAME)
+
+            return Intent().apply {
+                putExtra(RESULT_CODE, RESULT_CODE_SUCCESS)
             }
         }
-
-        private fun handleBackup(msg: Message) {
-            if(isAuthenticated(msg.sendingUid)) {
-                msg.replyTo.send(Message.obtain(null, REPLY_NOT_AUTHENTICATED, 0, 0))
-                return
-            }
-
-            // TODO logic for scheduling of backup
-        }
-
-        private fun handleRestore(msg: Message) {
-            if(isAuthenticated(msg.sendingUid)) {
-                msg.replyTo.send(Message.obtain(null, REPLY_NOT_AUTHENTICATED, 0, 0))
-                return
-            }
-        }
-
-        private fun isAuthenticated(uid : Int) : Boolean = !mAuthenticatedIds.contains(uid)
-    }
-
-    override fun onBind(intent: Intent?): IBinder? {
-        mMessenger = Messenger(
-            PFAHandler(
-                this
-            )
-        )
-        return mMessenger.binder
     }
 }
