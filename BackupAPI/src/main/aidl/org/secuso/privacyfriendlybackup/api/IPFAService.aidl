@@ -1,6 +1,6 @@
-// IBackupService.aidl
+// IPFAService.aidl
 package org.secuso.privacyfriendlybackup.api;
 
-interface IBackupService {
+interface IPFAService {
     Intent execute(in Intent data);
 }
