@@ -8,7 +8,6 @@ object PfaApi {
 
     @IntDef(MSG_AUTHENTICATE, MSG_SCHEDULE)
     @Retention(AnnotationRetention.SOURCE)
-    @Target(AnnotationTarget.FIELD)
     annotation class MessageCodes
 
     const val MSG_AUTHENTICATE = 1
@@ -17,7 +16,6 @@ object PfaApi {
 
     @IntDef(REPLY_AUTHENTICATION_OK, REPLY_AUTHENTICATION_ERROR)
     @Retention(AnnotationRetention.SOURCE)
-    @Target(AnnotationTarget.FIELD)
     annotation class MessageReplyCodes
 
     const val REPLY_AUTHENTICATION_OK = 127
@@ -29,7 +27,6 @@ object PfaApi {
 
     @IntDef(ERROR_AUTH_CERT_MISMATCH, ERROR_AUTH_APPLICATION_NOT_FOUND)
     @Retention(AnnotationRetention.SOURCE)
-    @Target(AnnotationTarget.FIELD)
     annotation class MessageReplyErrorCodes
 
     const val ERROR_AUTH_CERT_MISMATCH = 1
