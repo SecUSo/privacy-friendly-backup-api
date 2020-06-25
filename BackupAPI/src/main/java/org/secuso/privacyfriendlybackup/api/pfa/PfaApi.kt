@@ -2,8 +2,9 @@ package org.secuso.privacyfriendlybackup.api.pfa
 
 import android.os.Parcel
 import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 
-
+//@Parcelize
 data class PfaError(
     val code : PfaErrorCode,
     val errorMessage : String?
@@ -56,13 +57,13 @@ object PfaApi {
     const val API_VERSION = 1
 
     // Connect Actions
-    const val PFA_CONNECT_ACTION = "org.secuso.privacyfriendlybackup.api.PFAAuthService"
+    const val PFA_CONNECT_ACTION = "org.secuso.privacyfriendlybackup.api.pfa.PFAAuthService"
 
     const val EXTRA_CONNECT_PACKAGE_NAME = "PfaApi.EXTRA_CONNECT_PACKAGE_NAME"
+    const val EXTRA_CONNECT_IMMEDIATE = "PfaApi.EXTRA_CONNECT_IMMEDIATE"
 
     // Command Actions
-    const val ACTION_BACKUP = "PfaApi.ACTION_BACKUP"
-    const val ACTION_RESTORE = "PfaApi.ACTION_RESTORE"
+    const val ACTION_CONNECT = "PfaApi.ACTION_CONNECT"
 }
 
 object BackupApi {

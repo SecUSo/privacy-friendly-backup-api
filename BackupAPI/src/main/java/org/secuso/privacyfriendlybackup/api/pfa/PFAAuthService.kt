@@ -1,9 +1,10 @@
 package org.secuso.privacyfriendlybackup.api.pfa
 
 import android.content.Intent
+import androidx.work.WorkManager
 import org.secuso.privacyfriendlybackup.api.IPFAService
-import org.secuso.privacyfriendlybackup.api.pfa.PfaApi.ACTION_BACKUP
-import org.secuso.privacyfriendlybackup.api.pfa.PfaApi.ACTION_RESTORE
+import org.secuso.privacyfriendlybackup.api.pfa.PfaApi.ACTION_CONNECT
+import org.secuso.privacyfriendlybackup.api.pfa.PfaApi.EXTRA_CONNECT_IMMEDIATE
 import org.secuso.privacyfriendlybackup.api.pfa.PfaApi.EXTRA_CONNECT_PACKAGE_NAME
 
 /**
@@ -44,8 +45,7 @@ abstract class PFAAuthService : AbstractAuthService() {
 
         private fun handle(data: Intent): Intent {
             return when(data.action) {
-                ACTION_BACKUP -> handleBackup(data)
-                ACTION_RESTORE -> handleRestore(data)
+                ACTION_CONNECT -> handleConnect(data)
                 else -> Intent().apply {
                     putExtra(RESULT_CODE, RESULT_CODE_ERROR)
                     putExtra(RESULT_ERROR, PfaError(PfaError.PfaErrorCode.ACTION_ERROR, "Action ${data.action} is unsupported."))
@@ -53,17 +53,12 @@ abstract class PFAAuthService : AbstractAuthService() {
             }
         }
 
-        private fun handleBackup(data: Intent): Intent {
-            TODO("Not yet implemented")
-        }
-
-        private fun handleRestore(data: Intent): Intent {
-            TODO("Not yet implemented")
-        }
-
-        private fun successIntent(data : Intent) : Intent {
-            // TODO: do something with this?
+        private fun handleConnect(data: Intent): Intent {
             val backupPackageName = data.getStringExtra(EXTRA_CONNECT_PACKAGE_NAME)
+            val connectImmediately = data.getBooleanExtra(EXTRA_CONNECT_IMMEDIATE, false)
+
+            // TODO: connection to backup application
+            //WorkManager.getInstance(this@PFAAuthService)
 
             return Intent().apply {
                 putExtra(RESULT_CODE, RESULT_CODE_SUCCESS)

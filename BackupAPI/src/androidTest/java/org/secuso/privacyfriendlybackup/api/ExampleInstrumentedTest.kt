@@ -15,10 +15,13 @@ import org.junit.Assert.*
  */
 @RunWith(AndroidJUnit4::class)
 class ExampleInstrumentedTest {
+
+
+    val appContext = InstrumentationRegistry.getInstrumentation().targetContext
+
     @Test
     fun useAppContext() {
         // Context of the app under test.
-        val appContext = InstrumentationRegistry.getInstrumentation().targetContext
         assertEquals("org.secuso.privacyfriendlybackup.api", appContext.packageName)
     }
 }

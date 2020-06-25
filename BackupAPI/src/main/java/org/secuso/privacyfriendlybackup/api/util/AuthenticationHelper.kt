@@ -6,27 +6,39 @@ import android.content.pm.PackageManager
 import android.content.pm.Signature
 import android.os.Build
 import android.util.Base64
+import kotlinx.android.extensions.CacheImplementation
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
+import java.util.*
+import kotlin.collections.HashMap
 
 /**
  * @author Christopher Beckmann
  */
-object AuthenticationUtil {
+object AuthenticationHelper {
 
-    fun authenticate(context: Context, uid : Int) : Boolean {
-        // if no uid is sent - we can not authenticate
-        if(uid == -1)
-            return false
-
+    fun getPackageNames(context: Context, uid: Int) : Array<String> {
         val packageNameArray = context.packageManager.getPackagesForUid(uid)
 
-        if(packageNameArray == null || packageNameArray.isEmpty())
+        if (packageNameArray == null || packageNameArray.isEmpty()) {
+            return emptyArray()
+        }
+
+        return packageNameArray
+    }
+
+    fun authenticate(context: Context, uid: Int): Boolean {
+        // if no uid is sent - we can not authenticate
+        if (uid == -1)
+            return false
+
+        val packageNameArray = getPackageNames(context, uid)
+        if(packageNameArray.isEmpty())
             return false
 
         for (packageName in packageNameArray) {
             val certs = getCertificates(context, packageName)
-            if(certs.isEmpty())
+            if (certs.isEmpty())
                 return false
 
             TODO("")
@@ -43,7 +55,7 @@ object AuthenticationUtil {
      * @param packageName the package name for which the certificates are being loaded
      */
     @SuppressLint("PackageManagerGetSignatures")
-    fun getCertificates(context: Context, packageName: String): List<String> {
+    private fun getCertificates(context: Context, packageName: String): List<String> {
         try {
 
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {

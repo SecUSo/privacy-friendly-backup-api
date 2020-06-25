@@ -4,7 +4,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
-import org.secuso.privacyfriendlybackup.api.util.AuthenticationUtil
+import org.secuso.privacyfriendlybackup.api.util.AuthenticationHelper
 
 abstract class AbstractAuthService : Service() {
     protected abstract val mBinder : IBinder
@@ -39,7 +39,7 @@ abstract class AbstractAuthService : Service() {
         }
 
         // check if calling uid has permission to access this service
-        if(!AuthenticationUtil.authenticate(applicationContext, Binder.getCallingUid())) {
+        if(!AuthenticationHelper.authenticate(applicationContext, Binder.getCallingUid())) {
             return Intent().apply {
                 putExtra(RESULT_CODE, RESULT_CODE_ERROR)
                 putExtra(RESULT_ERROR, PfaError(PfaError.PfaErrorCode.AUTHENTICATION_ERROR, "Authentication failed."))
