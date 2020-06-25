@@ -1,11 +1,16 @@
 package org.secuso.privacyfriendlybackup.api.pfa
 
 import android.content.Intent
-import androidx.work.WorkManager
 import org.secuso.privacyfriendlybackup.api.IPFAService
-import org.secuso.privacyfriendlybackup.api.pfa.PfaApi.ACTION_CONNECT
-import org.secuso.privacyfriendlybackup.api.pfa.PfaApi.EXTRA_CONNECT_IMMEDIATE
-import org.secuso.privacyfriendlybackup.api.pfa.PfaApi.EXTRA_CONNECT_PACKAGE_NAME
+import org.secuso.privacyfriendlybackup.api.common.AbstractAuthService
+import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.RESULT_CODE
+import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.RESULT_CODE_ERROR
+import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.RESULT_CODE_SUCCESS
+import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.RESULT_ERROR
+import org.secuso.privacyfriendlybackup.api.common.PfaApi.ACTION_CONNECT
+import org.secuso.privacyfriendlybackup.api.common.PfaApi.EXTRA_CONNECT_IMMEDIATE
+import org.secuso.privacyfriendlybackup.api.common.PfaApi.EXTRA_CONNECT_PACKAGE_NAME
+import org.secuso.privacyfriendlybackup.api.common.PfaError
 
 /**
  * This class is meant to be extended by the PFA. Also it should then be included in the PFA's
@@ -48,7 +53,12 @@ abstract class PFAAuthService : AbstractAuthService() {
                 ACTION_CONNECT -> handleConnect(data)
                 else -> Intent().apply {
                     putExtra(RESULT_CODE, RESULT_CODE_ERROR)
-                    putExtra(RESULT_ERROR, PfaError(PfaError.PfaErrorCode.ACTION_ERROR, "Action ${data.action} is unsupported."))
+                    putExtra(RESULT_ERROR,
+                        PfaError(
+                            PfaError.PfaErrorCode.ACTION_ERROR,
+                            "Action ${data.action} is unsupported."
+                        )
+                    )
                 }
             }
         }

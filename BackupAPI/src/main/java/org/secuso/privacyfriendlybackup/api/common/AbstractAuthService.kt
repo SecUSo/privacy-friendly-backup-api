@@ -1,9 +1,13 @@
-package org.secuso.privacyfriendlybackup.api.pfa
+package org.secuso.privacyfriendlybackup.api.common
 
 import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
+import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.EXTRA_API_VERSION
+import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.RESULT_CODE
+import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.RESULT_CODE_ERROR
+import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.RESULT_ERROR
 import org.secuso.privacyfriendlybackup.api.util.AuthenticationHelper
 
 abstract class AbstractAuthService : Service() {
@@ -25,7 +29,12 @@ abstract class AbstractAuthService : Service() {
         if(data == null) {
             return Intent().apply {
                 putExtra(RESULT_CODE, RESULT_CODE_ERROR)
-                putExtra(RESULT_ERROR, PfaError(PfaError.PfaErrorCode.INTENT_ERROR, "Intent can not be null!"))
+                putExtra(RESULT_ERROR,
+                    PfaError(
+                        PfaError.PfaErrorCode.INTENT_ERROR,
+                        "Intent can not be null!"
+                    )
+                )
             }
         }
 
@@ -34,7 +43,11 @@ abstract class AbstractAuthService : Service() {
         if(version == -1 || !SUPPORTED_API_VERSIONS.contains(version)) {
             return Intent().apply {
                 putExtra(RESULT_CODE, RESULT_CODE_ERROR)
-                putExtra(RESULT_ERROR, PfaError(PfaError.PfaErrorCode.API_VERSION_UNSUPPORTED, "API Version '$version' is unsupported. Valid API versions are: $SUPPORTED_API_VERSIONS"))
+                putExtra(RESULT_ERROR,
+                    PfaError(
+                        PfaError.PfaErrorCode.API_VERSION_UNSUPPORTED,
+                        "API Version '$version' is unsupported. Valid API versions are: $SUPPORTED_API_VERSIONS")
+                    )
             }
         }
 
@@ -42,7 +55,12 @@ abstract class AbstractAuthService : Service() {
         if(!AuthenticationHelper.authenticate(applicationContext, Binder.getCallingUid())) {
             return Intent().apply {
                 putExtra(RESULT_CODE, RESULT_CODE_ERROR)
-                putExtra(RESULT_ERROR, PfaError(PfaError.PfaErrorCode.AUTHENTICATION_ERROR, "Authentication failed."))
+                putExtra(RESULT_ERROR,
+                    PfaError(
+                        PfaError.PfaErrorCode.AUTHENTICATION_ERROR,
+                        "Authentication failed."
+                    )
+                )
             }
         }
 
@@ -50,7 +68,12 @@ abstract class AbstractAuthService : Service() {
         if(data.action.isNullOrEmpty()) {
             return Intent().apply {
                 putExtra(RESULT_CODE, RESULT_CODE_ERROR)
-                putExtra(RESULT_ERROR, PfaError(PfaError.PfaErrorCode.ACTION_ERROR, "Action can not be null or empty."))
+                putExtra(RESULT_ERROR,
+                    PfaError(
+                        PfaError.PfaErrorCode.ACTION_ERROR,
+                        "Action can not be null or empty."
+                    )
+                )
             }
         }
 
