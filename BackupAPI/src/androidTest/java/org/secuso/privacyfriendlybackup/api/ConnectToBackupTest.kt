@@ -9,6 +9,9 @@ import androidx.work.testing.SynchronousExecutor
 import androidx.work.testing.WorkManagerTestInitHelper
 import junit.framework.Assert
 import junit.framework.Assert.assertEquals
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -60,17 +63,25 @@ class ConnectToBackupTest {
             .addTag("org.secuso.privacyfriendlybackup.api.ConnectBackupWork")
             .build()
 
-        workManager
-            .beginUniqueWork("org.secuso.privacyfriendlybackup.api.ConnectBackupWork", ExistingWorkPolicy.KEEP, backupWork)
-            .then(connectWork).enqueue()
 
-        assertEquals(
-            WorkInfo.State.SUCCEEDED,
-            workManager.getWorkInfoById(backupWork.id).get().state
-        )
-        assertEquals(
-            WorkInfo.State.SUCCEEDED,
-            workManager.getWorkInfoById(connectWork.id).get().state
-        )
+        runBlocking(Dispatchers.Default) {
+            workManager
+                .beginUniqueWork("org.secuso.privacyfriendlybackup.api.ConnectBackupWork", ExistingWorkPolicy.KEEP, backupWork)
+                .then(connectWork).enqueue()
+
+            assertEquals(
+                WorkInfo.State.SUCCEEDED,
+                workManager.getWorkInfoById(backupWork.id).get().state
+            )
+
+            do {
+                delay(1000)
+            } while(workManager.getWorkInfoById(connectWork.id).get().state == WorkInfo.State.RUNNING)
+
+            assertEquals(
+                WorkInfo.State.SUCCEEDED,
+                workManager.getWorkInfoById(connectWork.id).get().state
+            )
+        }
     }
 }

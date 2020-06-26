@@ -8,6 +8,8 @@ import android.os.Message
 import android.os.Messenger
 import android.util.Log
 import androidx.work.*
+import androidx.work.CoroutineWorker
+import kotlinx.coroutines.delay
 import org.secuso.privacyfriendlybackup.api.IBackupService
 import org.secuso.privacyfriendlybackup.api.pfa.BackupDataStore
 import org.secuso.privacyfriendlybackup.api.common.BackupApi.ACTION_SEND_MESSENGER
@@ -25,7 +27,7 @@ import java.util.concurrent.Executors
 /**
  * @author Christopher Beckmann
  */
-class ConnectBackupWorker(val context : Context, params: WorkerParameters) : Worker(context, params), BackupApiConnection.IBackupApiListener {
+class ConnectBackupWorker(val context : Context, params: WorkerParameters) : CoroutineWorker(context, params), BackupApiConnection.IBackupApiListener {
 
     val TAG = "PFABackup"
 
@@ -120,22 +122,21 @@ class ConnectBackupWorker(val context : Context, params: WorkerParameters) : Wor
             .beginUniqueWork("org.secuso.privacyfriendlybackup.api.ConnectBackupWork", ExistingWorkPolicy.APPEND, restoreBackupWorker).enqueue()
     }
 
-    override fun doWork(): Result {
+    override suspend fun doWork(): Result {
         mConnection.connect()
 
-        try {
-            do {
-                Thread.sleep(1000)
-            } while(!workDone)
-        } catch (e : InterruptedException) {
-            errorOccurred = true
-        } finally {
-            if(mConnection.isBound()) {
-                mConnection.disconnect()
-            }
+        var timeout = 60 * 5
+
+        // wait for connection to finish
+        do {
+            delay(1000)
+        } while(!workDone && --timeout > 0)
+
+        if(mConnection.isBound()) {
+            mConnection.disconnect()
         }
 
-        if(errorOccurred) {
+        if(errorOccurred || timeout <= 0) {
             return Result.failure()
         }
 
