@@ -1,9 +1,11 @@
 package org.secuso.privacyfriendlybackup.api
 
 import android.content.Context
+import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.work.*
+import androidx.work.testing.SynchronousExecutor
 import androidx.work.testing.TestWorkerBuilder
 import androidx.work.testing.WorkManagerTestInitHelper
 import kotlinx.coroutines.runBlocking
@@ -14,6 +16,7 @@ import org.junit.runner.RunWith
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.BeforeClass
+import org.secuso.privacyfriendlybackup.api.pfa.BackupDataStore
 import org.secuso.privacyfriendlybackup.api.pfa.BackupManager
 import org.secuso.privacyfriendlybackup.api.pfa.IBackupCreator
 import org.secuso.privacyfriendlybackup.api.pfa.IBackupRestorer
@@ -30,18 +33,17 @@ import java.util.concurrent.Executors
 class PfaWorkerTest {
     val packageName = "org.secuso.privacyfriendlybackup.api"
     val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-    val context = InstrumentationRegistry.getInstrumentation().context
-    lateinit var workManager : WorkManager
+    lateinit var workManager: WorkManager
 
-    @BeforeClass
+    @Before
     fun setUp() {
-        //val executor = Executors.newSingleThreadExecutor()
-        val config = Configuration.Builder().build()
-        WorkManagerTestInitHelper.initializeTestWorkManager(context, config)
-        workManager = WorkManager.getInstance(context)
+        val config = Configuration.Builder().setExecutor(SynchronousExecutor())
+            .setMinimumLoggingLevel(Log.DEBUG).build()
+        WorkManagerTestInitHelper.initializeTestWorkManager(appContext, config)
+        workManager = WorkManager.getInstance(appContext)
 
         BackupManager.backupRestorer = object : IBackupRestorer {
-            override fun restoreBackup(context: Context, restoreData: String) : Boolean {
+            override fun restoreBackup(context: Context, restoreData: String): Boolean {
                 Thread.sleep(1000)
                 return true
             }
@@ -55,8 +57,8 @@ class PfaWorkerTest {
         }
     }
 
-    @Test fun testCreateBackupWorker() {
-
+    @Test
+    fun testCreateBackupWorker() {
         //val constraints: Constraints = TODO()
         //val worker = OneTimeWorkRequestBuilder<CreateBackupWorker>().build()
         //workManager.enqueue(worker)
@@ -65,14 +67,26 @@ class PfaWorkerTest {
         // driver.setAllConstraintsMet(worker.id)
         //val workInfo = workManager.getWorkInfoById(worker.id).get()
         //assertEquals(WorkInfo.State.SUCCEEDED, workInfo.state)
+
+//        val worker = OneTimeWorkRequestBuilder<CreateBackupWorker>().build()
+//        workManager.enqueue(worker)
+//        val info = workManager.getWorkInfoById(worker.id).get()
+//        assertEquals(WorkInfo.State.SUCCEEDED, info.state)
         assertEquals(WorkInfo.State.SUCCEEDED, runWorker<CreateBackupWorker>().state)
     }
 
-    @Test fun testRestoreBackupWorker() {
+    @Test
+    fun testRestoreBackupWorker() {
+        BackupDataStore.saveRestoreData(appContext, "{ 'test': [] }")
         assertEquals(WorkInfo.State.SUCCEEDED, runWorker<RestoreBackupWorker>().state)
     }
 
-    inline fun <reified T : Worker> runWorker() : WorkInfo {
+    @Test
+    fun testRestoreBackupWorkerWithoutRestoreData() {
+        assertEquals(WorkInfo.State.FAILED, runWorker<RestoreBackupWorker>().state)
+    }
+
+    inline fun <reified T : Worker> runWorker(): WorkInfo {
         val worker = OneTimeWorkRequestBuilder<T>().build()
         workManager.enqueue(worker)
         return workManager.getWorkInfoById(worker.id).get()

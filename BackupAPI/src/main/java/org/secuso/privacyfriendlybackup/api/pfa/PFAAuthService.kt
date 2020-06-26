@@ -1,6 +1,7 @@
 package org.secuso.privacyfriendlybackup.api.pfa
 
 import android.content.Intent
+import android.util.Log
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
@@ -14,8 +15,10 @@ import org.secuso.privacyfriendlybackup.api.common.PfaApi.ACTION_CONNECT
 import org.secuso.privacyfriendlybackup.api.common.PfaApi.EXTRA_CONNECT_IMMEDIATE
 import org.secuso.privacyfriendlybackup.api.common.PfaApi.EXTRA_CONNECT_PACKAGE_NAME
 import org.secuso.privacyfriendlybackup.api.common.PfaError
+import org.secuso.privacyfriendlybackup.api.util.ApiFormatter
 import org.secuso.privacyfriendlybackup.api.worker.ConnectBackupWorker
 import org.secuso.privacyfriendlybackup.api.worker.CreateBackupWorker
+import java.util.concurrent.Executors
 
 /**
  * This class is meant to be extended by the PFA. Also it should then be included in the PFA's
@@ -40,17 +43,22 @@ import org.secuso.privacyfriendlybackup.api.worker.CreateBackupWorker
  */
 abstract class PFAAuthService : AbstractAuthService() {
 
+    val executor = Executors.newSingleThreadExecutor()
+
     override val SUPPORTED_API_VERSIONS = listOf(1)
 
     override val mBinder : IPFAService.Stub = object : IPFAService.Stub()  {
 
         override fun send(data: Intent?): Intent {
+            Log.d(this.javaClass.simpleName, "Intent received: ${ApiFormatter.formatIntent(data)}")
             val result = canAccess(data)
             if(result != null) {
                 return result
             }
             // data can not be null here else canAccess(Intent) would have returned an error
-            return handle(data!!)
+            val resultIntent = handle(data!!)
+            Log.d(this.javaClass.simpleName, "Sent Reply: ${ApiFormatter.formatIntent(resultIntent)}")
+            return resultIntent
         }
 
         private fun handle(data: Intent): Intent {
@@ -81,19 +89,21 @@ abstract class PFAAuthService : AbstractAuthService() {
     }
 
     private fun startBackupProcess() {
-        val workManager = WorkManager.getInstance(this)
+        executor.run {
+            val workManager = WorkManager.getInstance(this@PFAAuthService)
 
-        val backupWork = OneTimeWorkRequest.Builder(CreateBackupWorker::class.java)
-            .addTag("org.secuso.privacyfriendlybackup.api.CreateBackupWork")
-            //.setConstraints(Constraints.Builder().setRequiresBatteryNotLow(true).build())
-            .build()
+            val backupWork = OneTimeWorkRequest.Builder(CreateBackupWorker::class.java)
+                .addTag("org.secuso.privacyfriendlybackup.api.CreateBackupWork")
+                //.setConstraints(Constraints.Builder().setRequiresBatteryNotLow(true).build())
+                .build()
 
-        val connectWork = OneTimeWorkRequest.Builder(ConnectBackupWorker::class.java)
-            .addTag("org.secuso.privacyfriendlybackup.api.ConnectBackupWork")
-            .build()
+            val connectWork = OneTimeWorkRequest.Builder(ConnectBackupWorker::class.java)
+                .addTag("org.secuso.privacyfriendlybackup.api.ConnectBackupWork")
+                .build()
 
-        workManager
-            .beginUniqueWork("org.secuso.privacyfriendlybackup.api.ConnectBackupWork", ExistingWorkPolicy.KEEP, backupWork)
-            .then(connectWork).enqueue()
+            workManager
+                .beginUniqueWork("org.secuso.privacyfriendlybackup.api.ConnectBackupWork", ExistingWorkPolicy.KEEP, backupWork)
+                .then(connectWork).enqueue()
+        }
     }
 }

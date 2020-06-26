@@ -3,6 +3,7 @@ package org.secuso.privacyfriendlybackup.api.worker
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.os.Handler
+import android.os.Looper
 import android.os.Message
 import android.os.Messenger
 import android.util.Log
@@ -18,6 +19,7 @@ import org.secuso.privacyfriendlybackup.api.common.PfaError
 import org.secuso.privacyfriendlybackup.api.util.BackupApiConnection
 import org.secuso.privacyfriendlybackup.api.util.readString
 import java.lang.ref.WeakReference
+import java.util.concurrent.Executors
 
 /**
  * @author Christopher Beckmann
@@ -38,27 +40,29 @@ class ConnectBackupWorker(val context : Context, params: WorkerParameters) : Wor
     var workDone = false
     var errorOccurred = false
 
-    internal class MessageHandler(worker : ConnectBackupWorker) : Handler() {
+    internal class MessageHandler(worker : ConnectBackupWorker) : Handler(Looper.getMainLooper()) {
         val worker = WeakReference(worker)
 
         override fun handleMessage(msg: Message) {
-            when (msg.what) {
-                MESSENGER_BACKUP -> {
-                    Log.d(TAG, "[Message: MESSENGER_BACKUP($MESSENGER_BACKUP)]\n")
-                    worker.get()?.handleBackup()
-                }
-                MESSENGER_RESTORE -> {
-                    Log.d(TAG, "[Message: MESSENGER_RESTORE($MESSENGER_RESTORE)]\n")
-                    worker.get()?.handleRestore()
-                }
-                MESSENGER_DONE -> {
-                    Log.d(TAG, "[Message: MESSENGER_DONE($MESSENGER_DONE)]\n")
-                    worker.get()?.workDone = true
-                }
-                else -> {
-                    Log.d(TAG, "[Message: Unknown]\n")
-                    worker.get()?.errorOccurred = true
-                    worker.get()?.workDone = true
+            Executors.newSingleThreadExecutor().run {
+                when (msg.what) {
+                    MESSENGER_BACKUP -> {
+                        Log.d(TAG, "[Message: MESSENGER_BACKUP($MESSENGER_BACKUP)]\n")
+                        worker.get()?.handleBackup()
+                    }
+                    MESSENGER_RESTORE -> {
+                        Log.d(TAG, "[Message: MESSENGER_RESTORE($MESSENGER_RESTORE)]\n")
+                        worker.get()?.handleRestore()
+                    }
+                    MESSENGER_DONE -> {
+                        Log.d(TAG, "[Message: MESSENGER_DONE($MESSENGER_DONE)]\n")
+                        worker.get()?.workDone = true
+                    }
+                    else -> {
+                        Log.d(TAG, "[Message: Unknown]\n")
+                        worker.get()?.errorOccurred = true
+                        worker.get()?.workDone = true
+                    }
                 }
             }
         }

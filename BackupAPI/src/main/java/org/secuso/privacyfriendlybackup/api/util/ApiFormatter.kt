@@ -4,7 +4,11 @@ import android.content.Intent
 
 object ApiFormatter {
 
-    fun formatIntent(intent: Intent) : String {
+    fun formatIntent(intent: Intent?) : String {
+        if(intent == null) {
+            return "[null]"
+        }
+
         val sb = StringBuilder()
 
         sb.append("[\n")
