@@ -4,12 +4,11 @@ import android.content.Context
 import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.work.Configuration
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequest
-import androidx.work.WorkManager
+import androidx.work.*
 import androidx.work.testing.SynchronousExecutor
 import androidx.work.testing.WorkManagerTestInitHelper
+import junit.framework.Assert
+import junit.framework.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -36,6 +35,7 @@ class ConnectToBackupTest {
         BackupManager.backupRestorer = object : IBackupRestorer {
             override fun restoreBackup(context: Context, restoreData: String): Boolean {
                 Thread.sleep(1000)
+                Log.d("BACKUP CREATOR", "createBackup called.")
                 return true
             }
         }
@@ -43,6 +43,7 @@ class ConnectToBackupTest {
         BackupManager.backupCreator = object : IBackupCreator {
             override fun createBackup(context: Context): String {
                 Thread.sleep(1000)
+                Log.d("BACKUP RESTORER", "restoreBackup called.")
                 return "{ 'test': [] }"
             }
         }
@@ -50,10 +51,6 @@ class ConnectToBackupTest {
 
     @Test
     fun connect() {
-        startBackupProcess()
-    }
-
-    private fun startBackupProcess() {
         val backupWork = OneTimeWorkRequest.Builder(CreateBackupWorker::class.java)
             .addTag("org.secuso.privacyfriendlybackup.api.CreateBackupWork")
             //.setConstraints(Constraints.Builder().setRequiresBatteryNotLow(true).build())
@@ -66,5 +63,14 @@ class ConnectToBackupTest {
         workManager
             .beginUniqueWork("org.secuso.privacyfriendlybackup.api.ConnectBackupWork", ExistingWorkPolicy.KEEP, backupWork)
             .then(connectWork).enqueue()
+
+        assertEquals(
+            WorkInfo.State.SUCCEEDED,
+            workManager.getWorkInfoById(backupWork.id).get().state
+        )
+        assertEquals(
+            WorkInfo.State.SUCCEEDED,
+            workManager.getWorkInfoById(connectWork.id).get().state
+        )
     }
 }

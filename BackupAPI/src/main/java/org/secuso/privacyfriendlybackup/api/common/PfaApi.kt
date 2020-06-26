@@ -4,7 +4,7 @@ import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class PfaError(val code : PfaErrorCode, val errorMessage : String?) : Parcelable {
+data class PfaError(val code : PfaErrorCode, val errorMessage : String) : Parcelable {
     /**
      * New PFAErrorCodes should always be added at the end to avoid API version errors
      */
@@ -64,7 +64,8 @@ object BackupApi {
     const val EXTRA_MESSENGER = "BackupApi.EXTRA_MESSENGER"
 
     // Messenger Commands
-    const val MESSENGER_BACKUP = 1
-    const val MESSENGER_RESTORE = 2
-    const val MESSENGER_DONE = 3
+    const val MESSAGE_BACKUP = 1
+    const val MESSAGE_RESTORE = 2
+    const val MESSAGE_DONE = 3
+    const val MESSAGE_ERROR = 4
 }

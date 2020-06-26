@@ -14,6 +14,15 @@ import java.security.NoSuchAlgorithmException
  */
 object AuthenticationHelper {
 
+    fun getPackageName(context: Context, uid: Int) : String? {
+        val names = getPackageNames(context, uid)
+        return if(names.isNotEmpty()) {
+            names[0]
+        } else {
+            null
+        }
+    }
+
     fun getPackageNames(context: Context, uid: Int) : Array<String> {
         val packageNameArray = context.packageManager.getPackagesForUid(uid)
 

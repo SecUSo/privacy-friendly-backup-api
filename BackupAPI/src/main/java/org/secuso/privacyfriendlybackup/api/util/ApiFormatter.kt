@@ -6,12 +6,10 @@ object ApiFormatter {
 
     fun formatIntent(intent: Intent?) : String {
         if(intent == null) {
-            return "[null]"
+            return "\n[null]"
         }
 
-        val sb = StringBuilder()
-
-        sb.append("[\n")
+        val sb = StringBuilder("\n[Intent:\n")
 
         // action
         sb.append("\tAction:\t")
@@ -26,7 +24,7 @@ object ApiFormatter {
         val keySet = intent.extras?.keySet()
         if(!keySet.isNullOrEmpty()) {
             for (key in keySet) {
-                sb.append("\tExtra:\t$key:\t${intent.extras!!.get(key)}")
+                sb.append("\tExtra:\t$key:\t${intent.extras!!.get(key)}\n")
             }
         }
 

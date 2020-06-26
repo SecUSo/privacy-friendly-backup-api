@@ -11,9 +11,10 @@ import androidx.work.*
 import org.secuso.privacyfriendlybackup.api.IBackupService
 import org.secuso.privacyfriendlybackup.api.pfa.BackupDataStore
 import org.secuso.privacyfriendlybackup.api.common.BackupApi.ACTION_SEND_MESSENGER
-import org.secuso.privacyfriendlybackup.api.common.BackupApi.MESSENGER_BACKUP
-import org.secuso.privacyfriendlybackup.api.common.BackupApi.MESSENGER_DONE
-import org.secuso.privacyfriendlybackup.api.common.BackupApi.MESSENGER_RESTORE
+import org.secuso.privacyfriendlybackup.api.common.BackupApi.MESSAGE_BACKUP
+import org.secuso.privacyfriendlybackup.api.common.BackupApi.MESSAGE_DONE
+import org.secuso.privacyfriendlybackup.api.common.BackupApi.MESSAGE_ERROR
+import org.secuso.privacyfriendlybackup.api.common.BackupApi.MESSAGE_RESTORE
 import org.secuso.privacyfriendlybackup.api.common.PfaApi.EXTRA_CONNECT_PACKAGE_NAME
 import org.secuso.privacyfriendlybackup.api.common.PfaError
 import org.secuso.privacyfriendlybackup.api.util.BackupApiConnection
@@ -26,7 +27,7 @@ import java.util.concurrent.Executors
  */
 class ConnectBackupWorker(val context : Context, params: WorkerParameters) : Worker(context, params), BackupApiConnection.IBackupApiListener {
 
-    val TAG = ConnectBackupWorker::class.simpleName
+    val TAG = "PFABackup"
 
     var mConnection : BackupApiConnection =
         BackupApiConnection(
@@ -46,20 +47,23 @@ class ConnectBackupWorker(val context : Context, params: WorkerParameters) : Wor
         override fun handleMessage(msg: Message) {
             Executors.newSingleThreadExecutor().run {
                 when (msg.what) {
-                    MESSENGER_BACKUP -> {
-                        Log.d(TAG, "[Message: MESSENGER_BACKUP($MESSENGER_BACKUP)]\n")
+                    MESSAGE_BACKUP -> {
+                        Log.d(TAG, "\n\t[Message: MESSAGE_BACKUP($MESSAGE_BACKUP)]")
                         worker.get()?.handleBackup()
                     }
-                    MESSENGER_RESTORE -> {
-                        Log.d(TAG, "[Message: MESSENGER_RESTORE($MESSENGER_RESTORE)]\n")
+                    MESSAGE_RESTORE -> {
+                        Log.d(TAG, "\n\t[Message: MESSAGE_RESTORE($MESSAGE_RESTORE)]")
                         worker.get()?.handleRestore()
                     }
-                    MESSENGER_DONE -> {
-                        Log.d(TAG, "[Message: MESSENGER_DONE($MESSENGER_DONE)]\n")
+                    MESSAGE_ERROR -> {
+                        Log.d(TAG, "\n\t[Message: MESSAGE_ERROR($MESSAGE_ERROR)]")
+                    }
+                    MESSAGE_DONE -> {
+                        Log.d(TAG, "\n\t[Message: MESSAGE_DONE($MESSAGE_DONE)]")
                         worker.get()?.workDone = true
                     }
                     else -> {
-                        Log.d(TAG, "[Message: Unknown]\n")
+                        Log.d(TAG, "\n\t[Message: Unknown(${msg.what})]")
                         worker.get()?.errorOccurred = true
                         worker.get()?.workDone = true
                     }
@@ -103,6 +107,8 @@ class ConnectBackupWorker(val context : Context, params: WorkerParameters) : Wor
             return
         }
 
+        Log.d(TAG, "Received restore data: $restoreData")
+
         // save restore data
         BackupDataStore.saveRestoreData(context, restoreData!!)
 
@@ -139,15 +145,18 @@ class ConnectBackupWorker(val context : Context, params: WorkerParameters) : Wor
     }
 
     override fun onBound(service: IBackupService?) {
+        Log.d(TAG, "onBound($service)")
         // do nothing
     }
 
     override fun onError(error: PfaError) {
+        Log.d(TAG, error.toString())
         errorOccurred = true
         workDone = true
     }
 
     override fun onSuccess(action: String) {
+        Log.d(TAG, "onSuccess($action)")
         when(action) {
             ACTION_SEND_MESSENGER -> { /* nice but do nothing */ }
             else -> {
@@ -158,6 +167,7 @@ class ConnectBackupWorker(val context : Context, params: WorkerParameters) : Wor
     }
 
     override fun onDisconnected() {
+        Log.d(TAG, "onDisconnected()")
         if(!workDone) {
             errorOccurred = true
             workDone = true

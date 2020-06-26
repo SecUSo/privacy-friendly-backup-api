@@ -7,6 +7,7 @@ import android.content.ServiceConnection
 import android.os.IBinder
 import android.os.Messenger
 import android.os.ParcelFileDescriptor
+import android.util.Log
 import org.secuso.privacyfriendlybackup.api.IBackupService
 import org.secuso.privacyfriendlybackup.api.common.BackupApi
 import org.secuso.privacyfriendlybackup.api.common.BackupApi.ACTION_SEND_MESSENGER
@@ -67,7 +68,7 @@ class BackupApiConnection(
             return
         }
         val result : Intent = mService!!.send(Intent().apply {
-            putExtra(CommonApiConstants.EXTRA_API_VERSION, mApiVersion)
+            putExtra(EXTRA_API_VERSION, mApiVersion)
             setAction(action)
         })
 
@@ -168,7 +169,7 @@ class BackupApiConnection(
 
         val pipes = ParcelFileDescriptor.createPipe()
 
-        mBackupOutputPipe = pipes[1]
+        mBackupOutputPipe = pipes[0]
 
         return ParcelFileDescriptor.AutoCloseOutputStream(pipes[1])
     }
