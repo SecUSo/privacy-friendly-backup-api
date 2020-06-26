@@ -7,7 +7,7 @@ import android.content.Context
  */
 object BackupDataStore {
 
-    // TODO: shared preference is prolly not the best choice...
+    // shared preference is prolly not the best choice...
     const val BACKUP_DATA = "BackupDataStore.BACKUP_DATA"
     const val RESTORE_DATA = "BackupDataStore.RESTORE_DATA"
 
@@ -36,7 +36,7 @@ object BackupDataStore {
         pref.edit().putString(BACKUP_DATA, backupData).apply()
     }
 
-    fun cleanBackupData(context: Context) {
+    private fun cleanBackupData(context: Context) {
         val pref = context.getSharedPreferences(BackupDataStore::class.simpleName, Context.MODE_PRIVATE)
         pref.edit().remove(BACKUP_DATA).apply()
     }
@@ -49,5 +49,11 @@ object BackupDataStore {
     fun isRestoreDataSaved(context: Context): Boolean {
         return context.getSharedPreferences(BackupDataStore::class.simpleName, Context.MODE_PRIVATE)
             .contains(RESTORE_DATA)
+    }
+
+    fun cleanBackupDataIfNoRestoreData(context: Context) {
+        if(!isRestoreDataSaved(context)) {
+            cleanBackupData(context)
+        }
     }
 }

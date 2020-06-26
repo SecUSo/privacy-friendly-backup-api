@@ -1,9 +1,11 @@
 package org.secuso.privacyfriendlybackup.api.worker
 
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.os.Handler
 import android.os.Message
 import android.os.Messenger
+import android.util.Log
 import androidx.work.*
 import org.secuso.privacyfriendlybackup.api.IBackupService
 import org.secuso.privacyfriendlybackup.api.pfa.BackupDataStore
@@ -13,7 +15,7 @@ import org.secuso.privacyfriendlybackup.api.common.BackupApi.MESSENGER_DONE
 import org.secuso.privacyfriendlybackup.api.common.BackupApi.MESSENGER_RESTORE
 import org.secuso.privacyfriendlybackup.api.common.PfaApi.EXTRA_CONNECT_PACKAGE_NAME
 import org.secuso.privacyfriendlybackup.api.common.PfaError
-import org.secuso.privacyfriendlybackup.api.pfa.BackupApiConnection
+import org.secuso.privacyfriendlybackup.api.util.BackupApiConnection
 import org.secuso.privacyfriendlybackup.api.util.readString
 import java.lang.ref.WeakReference
 
@@ -22,10 +24,13 @@ import java.lang.ref.WeakReference
  */
 class ConnectBackupWorker(val context : Context, params: WorkerParameters) : Worker(context, params), BackupApiConnection.IBackupApiListener {
 
+    val TAG = ConnectBackupWorker::class.simpleName
+
     var mConnection : BackupApiConnection =
         BackupApiConnection(
             context,
-            params.inputData.getString(EXTRA_CONNECT_PACKAGE_NAME) ?: "org.secuso.privacyfriendlybackup",
+            params.inputData.getString(EXTRA_CONNECT_PACKAGE_NAME)
+                ?: "org.secuso.privacyfriendlybackup",
             this,
             Messenger(MessageHandler(this))
         )
@@ -38,12 +43,20 @@ class ConnectBackupWorker(val context : Context, params: WorkerParameters) : Wor
 
         override fun handleMessage(msg: Message) {
             when (msg.what) {
-                MESSENGER_BACKUP -> worker.get()?.handleBackup()
-                MESSENGER_RESTORE -> worker.get()?.handleRestore()
+                MESSENGER_BACKUP -> {
+                    Log.d(TAG, "[Message: MESSENGER_BACKUP($MESSENGER_BACKUP)]\n")
+                    worker.get()?.handleBackup()
+                }
+                MESSENGER_RESTORE -> {
+                    Log.d(TAG, "[Message: MESSENGER_RESTORE($MESSENGER_RESTORE)]\n")
+                    worker.get()?.handleRestore()
+                }
                 MESSENGER_DONE -> {
+                    Log.d(TAG, "[Message: MESSENGER_DONE($MESSENGER_DONE)]\n")
                     worker.get()?.workDone = true
                 }
                 else -> {
+                    Log.d(TAG, "[Message: Unknown]\n")
                     worker.get()?.errorOccurred = true
                     worker.get()?.workDone = true
                 }
@@ -116,7 +129,8 @@ class ConnectBackupWorker(val context : Context, params: WorkerParameters) : Wor
             return Result.failure()
         }
 
-        BackupDataStore.cleanBackupData(context)
+        // keep backup data as long restore is not done
+        BackupDataStore.cleanBackupDataIfNoRestoreData(context)
         return Result.success(Data.EMPTY)
     }
 

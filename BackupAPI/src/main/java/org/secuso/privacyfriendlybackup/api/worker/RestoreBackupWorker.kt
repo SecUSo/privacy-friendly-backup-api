@@ -16,9 +16,15 @@ class RestoreBackupWorker(val context : Context, params: WorkerParameters) : Wor
         val restoreData = BackupDataStore.getRestoreData(context) ?: return Result.failure()
         val backupRestorer = BackupManager.backupRestorer ?: return Result.failure()
 
-        backupRestorer.restoreBackup(context, restoreData)
+        val success = backupRestorer.restoreBackup(context, restoreData)
 
+        if(!success) {
+            return Result.failure()
+        }
+
+        // clean backup and restore data
         BackupDataStore.cleanRestoreData(context)
+        BackupDataStore.cleanBackupDataIfNoRestoreData(context)
 
         return Result.success(Data.EMPTY)
     }

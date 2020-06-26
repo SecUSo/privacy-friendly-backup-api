@@ -1,4 +1,4 @@
-package org.secuso.privacyfriendlybackup.api.pfa
+package org.secuso.privacyfriendlybackup.api.util
 
 import android.content.ComponentName
 import android.content.Context
