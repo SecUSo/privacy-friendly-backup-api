@@ -1,6 +1,9 @@
 package org.secuso.privacyfriendlybackup.api.pfa
 
 import android.content.Intent
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkManager
 import org.secuso.privacyfriendlybackup.api.IPFAService
 import org.secuso.privacyfriendlybackup.api.common.AbstractAuthService
 import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.RESULT_CODE
@@ -11,6 +14,8 @@ import org.secuso.privacyfriendlybackup.api.common.PfaApi.ACTION_CONNECT
 import org.secuso.privacyfriendlybackup.api.common.PfaApi.EXTRA_CONNECT_IMMEDIATE
 import org.secuso.privacyfriendlybackup.api.common.PfaApi.EXTRA_CONNECT_PACKAGE_NAME
 import org.secuso.privacyfriendlybackup.api.common.PfaError
+import org.secuso.privacyfriendlybackup.api.worker.ConnectBackupWorker
+import org.secuso.privacyfriendlybackup.api.worker.CreateBackupWorker
 
 /**
  * This class is meant to be extended by the PFA. Also it should then be included in the PFA's
@@ -67,12 +72,28 @@ abstract class PFAAuthService : AbstractAuthService() {
             val backupPackageName = data.getStringExtra(EXTRA_CONNECT_PACKAGE_NAME)
             val connectImmediately = data.getBooleanExtra(EXTRA_CONNECT_IMMEDIATE, false)
 
-            // TODO: connection to backup application
-            //WorkManager.getInstance(this@PFAAuthService)
+            startBackupProcess()
 
             return Intent().apply {
                 putExtra(RESULT_CODE, RESULT_CODE_SUCCESS)
             }
         }
+    }
+
+    private fun startBackupProcess() {
+        val workManager = WorkManager.getInstance(this)
+
+        val backupWork = OneTimeWorkRequest.Builder(CreateBackupWorker::class.java)
+            .addTag("org.secuso.privacyfriendlybackup.api.CreateBackupWork")
+            //.setConstraints(Constraints.Builder().setRequiresBatteryNotLow(true).build())
+            .build()
+
+        val connectWork = OneTimeWorkRequest.Builder(ConnectBackupWorker::class.java)
+            .addTag("org.secuso.privacyfriendlybackup.api.ConnectBackupWork")
+            .build()
+
+        workManager
+            .beginUniqueWork("org.secuso.privacyfriendlybackup.api.ConnectBackupWork", ExistingWorkPolicy.KEEP, backupWork)
+            .then(connectWork).enqueue()
     }
 }

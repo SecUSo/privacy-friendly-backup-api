@@ -3,17 +3,10 @@ package org.secuso.privacyfriendlybackup.api.util
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
-import android.content.pm.Signature
 import android.os.Build
-import android.util.Base64
-import android.util.JsonReader
 import org.json.JSONArray
 import org.json.JSONException
-import org.json.JSONObject
-import java.io.FileNotFoundException
 import java.io.IOException
-import java.io.InputStream
-import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 
 /**
@@ -31,7 +24,30 @@ object AuthenticationHelper {
         return packageNameArray
     }
 
-    fun authenticate(context: Context, uid: Int): Boolean {
+    @Throws(IOException::class, JSONException::class)
+    fun loadValidSignatures(context: Context, file : String = "Signatures.json") : List<String>  {
+        val validSignatures : MutableList<String> = ArrayList()
+
+        //var jsonArray = JSONArray(context.assets.open(context.assets.list("")!![0]).readJson())
+        var signatureJson = JSONArray(context.assets.open(file).readString())
+        for(i in 0 until signatureJson.length()) {
+            val sig = signatureJson.get(i) as String
+            validSignatures.add(sig)
+        }
+
+        return validSignatures
+    }
+
+    /**
+     * Test if the given uid is in the list of valid signatures.
+     *
+     * @param context The context with which the packageManager is loaded and assets are loaded
+     * @param uid The id of the process being authenticated
+     * @param validSignaturesParam Optional - custom list of valid signatures given as hex strings (see {@link bytesToHex(ByteArray)})
+     *
+     * @return true if uid is authorized or false if not
+     */
+    fun authenticate(context: Context, uid: Int, validSignaturesParam : List<String> = emptyList()): Boolean {
         // if no uid is sent - we can not authenticate
         if (uid == -1)
             return false
@@ -45,19 +61,15 @@ object AuthenticationHelper {
             return true
         }
 
-        val validSignatures : MutableList<String> = ArrayList()
-
-        try {
-            //var jsonArray = JSONArray(context.assets.open(context.assets.list("")!![0]).readJson())
-            var signatureJson = JSONArray(context.assets.open("Signatures.json").readJson())
-            for(i in 0 until signatureJson.length()) {
-                val sig = signatureJson.get(i) as String
-                validSignatures.add(sig)
+        val validSignatures = ArrayList(validSignaturesParam)
+        if(validSignatures.isEmpty()) {
+            try {
+                validSignatures.addAll(loadValidSignatures(context))
+            } catch (e : IOException) {
+                return false
+            } catch (e : JSONException) {
+                return false
             }
-        } catch (e : IOException) {
-            return false
-        } catch (e : JSONException) {
-            return false
         }
 
         for (packageName in packageNameArray) {
@@ -112,41 +124,4 @@ object AuthenticationHelper {
     }
 }
 
-/**
- * Extension function to convert Signature to Base64
- */
-fun Signature.toBase64() : String {
-    val md = MessageDigest.getInstance("SHA")
-    md.update(this.toByteArray())
-    return Base64.encodeToString(md.digest(), Base64.DEFAULT)
-}
 
-/**
- * Extension function to convert Signature to Hex
- */
-fun Signature.toHex() : String {
-    val md = MessageDigest.getInstance("SHA")
-    md.update(this.toByteArray())
-    return bytesToHex(md.digest())
-}
-
-fun bytesToHex(bytes: ByteArray) : String {
-    val HEX_CHARS = "0123456789ABCDEF"
-    val result = StringBuilder(bytes.size * 2)
-
-    bytes.forEach {
-        val i = it.toInt()
-        result.append(HEX_CHARS[i shr 4 and 0x0f])
-        result.append(HEX_CHARS[i and 0x0f])
-    }
-
-    return result.toString()
-}
-
-fun InputStream.readJson() : String {
-    return this.use {
-        val buffer = ByteArray(it.available())
-        read(buffer)
-        return@use String(buffer, Charsets.UTF_8)
-    }
-}

@@ -3,7 +3,8 @@ package org.secuso.privacyfriendlybackup.api;
 
 interface IBackupService {
 
-    void performRestore();
-    void performBackup();
+    ParcelFileDescriptor performRestore();
+    void performBackup(in ParcelFileDescriptor input);
+
     Intent send(in Intent data);
 }

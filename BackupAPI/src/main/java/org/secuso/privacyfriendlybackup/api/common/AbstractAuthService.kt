@@ -10,6 +10,9 @@ import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.RESULT_COD
 import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.RESULT_ERROR
 import org.secuso.privacyfriendlybackup.api.util.AuthenticationHelper
 
+/**
+ * @author Christopher Beckmann
+ */
 abstract class AbstractAuthService : Service() {
     protected abstract val mBinder : IBinder
     protected abstract val SUPPORTED_API_VERSIONS : List<Int>

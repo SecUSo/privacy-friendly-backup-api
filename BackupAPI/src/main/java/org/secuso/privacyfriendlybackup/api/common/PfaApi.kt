@@ -42,11 +42,12 @@ object PfaApi {
     // Connect Actions
     const val PFA_CONNECT_ACTION = "org.secuso.privacyfriendlybackup.api.pfa.PFAAuthService"
 
-    const val EXTRA_CONNECT_PACKAGE_NAME = "PfaApi.EXTRA_CONNECT_PACKAGE_NAME"
-    const val EXTRA_CONNECT_IMMEDIATE = "PfaApi.EXTRA_CONNECT_IMMEDIATE"
-
     // Command Actions
     const val ACTION_CONNECT = "PfaApi.ACTION_CONNECT"
+
+    // Extras
+    const val EXTRA_CONNECT_PACKAGE_NAME = "PfaApi.EXTRA_CONNECT_PACKAGE_NAME"
+    const val EXTRA_CONNECT_IMMEDIATE = "PfaApi.EXTRA_CONNECT_IMMEDIATE"
 }
 
 object BackupApi {
@@ -57,4 +58,13 @@ object BackupApi {
     const val BACKUP_CONNECT_ACTION = "org.secuso.privacyfriendlybackup.services.BackupService"
 
     // Command Actions
+    const val ACTION_SEND_MESSENGER = "BackupApi.ACTION_SEND_MESSENGER"
+
+    // Extras
+    const val EXTRA_MESSENGER = "BackupApi.EXTRA_MESSENGER"
+
+    // Messenger Commands
+    const val MESSENGER_BACKUP = 1
+    const val MESSENGER_RESTORE = 2
+    const val MESSENGER_DONE = 3
 }
