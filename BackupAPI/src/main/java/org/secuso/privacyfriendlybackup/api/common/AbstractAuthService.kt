@@ -1,6 +1,7 @@
 package org.secuso.privacyfriendlybackup.api.common
 
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
@@ -82,5 +83,4 @@ abstract class AbstractAuthService : Service() {
 
         return null
     }
-
 }

@@ -2,6 +2,7 @@ package org.secuso.privacyfriendlybackup.api.util
 
 import android.content.pm.Signature
 import android.util.Base64
+import java.io.File
 import java.io.InputStream
 import java.security.MessageDigest
 
@@ -33,4 +34,14 @@ fun ByteArray.bytesToHex() : String {
         result.append(HEX_CHARS[i and 0x0f])
     }
     return result.toString()
+}
+
+fun InputStream.toFile(path: String) {
+    File(path).outputStream().use { this.copyTo(it) }
+}
+
+fun File.copyInputStreamToFile(inputStream: InputStream) {
+    this.outputStream().use { fileOut ->
+        inputStream.copyTo(fileOut)
+    }
 }
