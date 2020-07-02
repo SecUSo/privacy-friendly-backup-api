@@ -2,6 +2,7 @@ package org.secuso.privacyfriendlybackup.api.util
 
 import android.content.pm.Signature
 import android.util.Base64
+import android.util.Log
 import java.io.File
 import java.io.InputStream
 import java.security.MessageDigest
@@ -22,17 +23,21 @@ fun Signature.toBase64() : String {
 fun Signature.toHex() : String {
     val md = MessageDigest.getInstance("SHA")
     md.update(this.toByteArray())
-    return md.digest().bytesToHex()
+    return md.digest().toHex()
 }
 
-fun ByteArray.bytesToHex() : String {
+fun ByteArray.toHex() : String {
     val HEX_CHARS = "0123456789ABCDEF"
     val result = StringBuilder(this.size * 2)
+    var counter = 0
     this.forEach {
+        counter++
         val i = it.toInt()
         result.append(HEX_CHARS[i shr 4 and 0x0f])
         result.append(HEX_CHARS[i and 0x0f])
+        result.append(':')
     }
+    result.deleteCharAt(result.lastIndex)
     return result.toString()
 }
 
