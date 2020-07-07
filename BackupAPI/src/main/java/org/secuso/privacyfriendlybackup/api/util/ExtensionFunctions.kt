@@ -29,15 +29,15 @@ fun Signature.toHex() : String {
 fun ByteArray.toHex() : String {
     val HEX_CHARS = "0123456789ABCDEF"
     val result = StringBuilder(this.size * 2)
-    var counter = 0
     this.forEach {
-        counter++
         val i = it.toInt()
         result.append(HEX_CHARS[i shr 4 and 0x0f])
         result.append(HEX_CHARS[i and 0x0f])
         result.append(':')
     }
-    result.deleteCharAt(result.lastIndex)
+    if(result.isNotEmpty()) {
+        result.deleteCharAt(result.lastIndex)
+    }
     return result.toString()
 }
 
