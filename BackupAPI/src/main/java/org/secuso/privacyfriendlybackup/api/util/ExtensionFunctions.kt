@@ -3,6 +3,8 @@ package org.secuso.privacyfriendlybackup.api.util
 import android.content.pm.Signature
 import android.util.Base64
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import java.io.File
 import java.io.InputStream
 import java.security.MessageDigest
@@ -49,4 +51,14 @@ fun File.copyInputStreamToFile(inputStream: InputStream) {
     this.outputStream().use { fileOut ->
         inputStream.copyTo(fileOut)
     }
+}
+
+fun <T, K, R> MediatorLiveData<R>.addSources(liveData1: LiveData<T>, liveData2: LiveData<K>, block: (T?, K?) -> R): MediatorLiveData<R> {
+    this.addSource(liveData1) {
+        this.value = block.invoke(liveData1.value, liveData2.value)
+    }
+    this.addSource(liveData2) {
+        this.value = block.invoke(liveData1.value, liveData2.value)
+    }
+    return this
 }
