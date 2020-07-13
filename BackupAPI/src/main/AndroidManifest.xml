@@ -2,24 +2,4 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="org.secuso.privacyfriendlybackup.api">
 
-    <application
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-
-        <service
-            android:name=".pfa.PFAAuthService"
-            android:enabled="true"
-            android:exported="true"
-            android:process=":backup"
-            tools:ignore="ExportedService">
-            <intent-filter>
-                <action android:name="org.secuso.privacyfriendlybackup.api.PFAAuthService" />
-            </intent-filter>
-        </service>
-
-    </application>
-
 </manifest>

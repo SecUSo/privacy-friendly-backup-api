@@ -7,6 +7,6 @@ import org.secuso.privacyfriendlybackup.api.pfa.IBackupRestorer
  * @author Christopher Beckmann
  */
 object BackupManager {
-    var backupCreator : IBackupCreator? = null
-    var backupRestorer : IBackupRestorer? = null
+    @JvmStatic var backupCreator : IBackupCreator? = null
+    @JvmStatic var backupRestorer : IBackupRestorer? = null
 }
