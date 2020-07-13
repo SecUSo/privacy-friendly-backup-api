@@ -1,6 +1,7 @@
 package org.secuso.privacyfriendlybackup.api.pfa
 
 import android.content.Intent
+import android.os.Binder
 import android.util.Log
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequest
@@ -51,7 +52,7 @@ abstract class PFAAuthService : AbstractAuthService() {
 
         override fun send(data: Intent?): Intent {
             Log.d(this.javaClass.simpleName, "Intent received: ${ApiFormatter.formatIntent(data)}")
-            val result = canAccess(data)
+            val result = canAccess(data, Binder.getCallingUid())
             if(result != null) {
                 return result
             }

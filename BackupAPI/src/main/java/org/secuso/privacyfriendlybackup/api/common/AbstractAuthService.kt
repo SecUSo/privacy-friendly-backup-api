@@ -28,7 +28,7 @@ abstract class AbstractAuthService : Service() {
      *
      * @return null if access is granted or an Intent with the RESULT_CODE set to RESULT_CODE_ERROR
      */
-    protected fun canAccess(data : Intent?) : Intent? {
+    protected fun canAccess(data : Intent?, callerId : Int) : Intent? {
         // check if intent is not null
         if(data == null) {
             return Intent().apply {
@@ -56,7 +56,7 @@ abstract class AbstractAuthService : Service() {
         }
 
         // check if calling uid has permission to access this service
-        if(!AuthenticationHelper.authenticate(applicationContext, Binder.getCallingUid())) {
+        if(!AuthenticationHelper.authenticate(applicationContext, callerId)) {
             return Intent().apply {
                 putExtra(RESULT_CODE, RESULT_CODE_ERROR)
                 putExtra(RESULT_ERROR,
