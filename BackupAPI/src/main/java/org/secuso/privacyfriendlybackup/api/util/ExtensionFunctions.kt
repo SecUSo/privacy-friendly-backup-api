@@ -26,6 +26,10 @@ fun ByteArray.toBase64() : String {
     return Base64.encodeToString(this, Base64.DEFAULT)
 }
 
+fun String.fromBase64() : ByteArray {
+    return Base64.decode(this, Base64.DEFAULT)
+}
+
 fun Signature.toHex() : String {
     val md = MessageDigest.getInstance("SHA")
     md.update(this.toByteArray())

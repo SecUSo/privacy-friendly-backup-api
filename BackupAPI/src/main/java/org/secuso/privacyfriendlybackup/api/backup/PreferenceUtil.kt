@@ -1,4 +1,4 @@
-package org.secuso.privacyfriendlybackup.api.util
+package org.secuso.privacyfriendlybackup.api.backup
 
 import android.content.SharedPreferences
 import android.util.JsonWriter

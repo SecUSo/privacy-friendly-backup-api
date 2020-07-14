@@ -1,5 +1,6 @@
-package org.secuso.privacyfriendlybackup.api.util
+package org.secuso.privacyfriendlybackup.api.backup
 
+import android.content.ContentValues
 import android.database.Cursor.*
 import android.database.sqlite.SQLiteDatabase
 import android.util.JsonReader
@@ -8,6 +9,7 @@ import androidx.core.database.getBlobOrNull
 import androidx.core.database.getFloatOrNull
 import androidx.core.database.getIntOrNull
 import androidx.core.database.getStringOrNull
+import org.secuso.privacyfriendlybackup.api.util.toBase64
 import java.io.StringReader
 import java.io.StringWriter
 
@@ -20,11 +22,6 @@ import java.io.StringWriter
  * @author Karola Marky (yonjuni), Christopher Beckmann (Kamuno)
  */
 object DatabaseUtil {
-
-    @JvmStatic
-    fun jsonToDatabase(json: String) {
-        val reader = JsonReader(StringReader(json))
-    }
 
     @JvmStatic
     fun writeDatabase(writer: JsonWriter, db: SQLiteDatabase) {
@@ -105,6 +102,57 @@ object DatabaseUtil {
             }
         }
         writer.endArray()
+    }
+
+    @JvmStatic
+    fun readDatabaseContent(reader: JsonReader, db: SQLiteDatabase) {
+        reader.beginArray()
+
+        while(reader.hasNext()) {
+            readTable(reader,db)
+        }
+
+        reader.endArray()
+    }
+
+    @JvmStatic
+    fun readTable(reader: JsonReader, db: SQLiteDatabase) {
+        reader.beginObject()
+
+        // tableName
+        reader.nextName()
+        val tableName = reader.nextString()
+
+        // createSql
+        reader.nextName()
+        val createSql = reader.nextString()
+        // do not create android_metadata - because it will automatically be created already
+        if(tableName != "android_metadata" && tableName != "sqlite_sequence") {
+            db.execSQL(createSql)
+        }
+
+        // values
+        reader.nextName()
+        readValues(reader, db, tableName)
+
+        reader.endObject()
+    }
+
+    @JvmStatic
+    fun readValues(reader: JsonReader, db: SQLiteDatabase, tableName: String) {
+        reader.beginArray()
+        while(reader.hasNext()) {
+            reader.beginObject()
+            val cv = ContentValues()
+            while(reader.hasNext()) {
+                val name = reader.nextName()
+                val value = reader.nextString()
+                cv.put(name, value)
+            }
+            db.insert(tableName, null, cv)
+            reader.endObject()
+        }
+        reader.endArray()
     }
 
 }

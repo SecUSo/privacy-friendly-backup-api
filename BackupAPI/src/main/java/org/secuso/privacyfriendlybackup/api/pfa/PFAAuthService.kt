@@ -91,20 +91,18 @@ abstract class PFAAuthService : AbstractAuthService() {
 
     private fun startBackupProcess() {
         executor.run {
-            val workManager = WorkManager.getInstance(this@PFAAuthService)
-
-            val backupWork = OneTimeWorkRequest.Builder(CreateBackupWorker::class.java)
-                .addTag("org.secuso.privacyfriendlybackup.api.CreateBackupWork")
-                //.setConstraints(Constraints.Builder().setRequiresBatteryNotLow(true).build())
-                .build()
+//            val backupWork = OneTimeWorkRequest.Builder(CreateBackupWorker::class.java)
+//                .addTag("org.secuso.privacyfriendlybackup.api.CreateBackupWork")
+//                //.setConstraints(Constraints.Builder().setRequiresBatteryNotLow(true).build())
+//                .build()
 
             val connectWork = OneTimeWorkRequest.Builder(ConnectBackupWorker::class.java)
                 .addTag("org.secuso.privacyfriendlybackup.api.ConnectBackupWork")
                 .build()
 
-            workManager
-                .beginUniqueWork("org.secuso.privacyfriendlybackup.api.ConnectBackupWork", ExistingWorkPolicy.KEEP, backupWork)
-                .then(connectWork).enqueue()
+            WorkManager.getInstance(this@PFAAuthService)
+                    .beginUniqueWork("org.secuso.privacyfriendlybackup.api.ConnectBackupWork", ExistingWorkPolicy.KEEP, connectWork)
+                    .enqueue()
         }
     }
 }

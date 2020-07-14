@@ -1,7 +1,8 @@
 package org.secuso.privacyfriendlybackup.api.pfa
 
 import android.content.Context
+import java.io.OutputStream
 
 interface IBackupCreator {
-    fun createBackup(context: Context) : String
+    fun writeBackup(context: Context, outputStream: OutputStream)
 }

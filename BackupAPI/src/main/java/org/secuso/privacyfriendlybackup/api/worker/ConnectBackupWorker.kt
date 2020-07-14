@@ -19,6 +19,7 @@ import org.secuso.privacyfriendlybackup.api.common.BackupApi.MESSAGE_ERROR
 import org.secuso.privacyfriendlybackup.api.common.BackupApi.MESSAGE_RESTORE
 import org.secuso.privacyfriendlybackup.api.common.PfaApi.EXTRA_CONNECT_PACKAGE_NAME
 import org.secuso.privacyfriendlybackup.api.common.PfaError
+import org.secuso.privacyfriendlybackup.api.pfa.BackupManager
 import org.secuso.privacyfriendlybackup.api.util.BackupApiConnection
 import org.secuso.privacyfriendlybackup.api.util.readString
 import java.lang.ref.WeakReference
@@ -75,19 +76,19 @@ class ConnectBackupWorker(val context : Context, params: WorkerParameters) : Cor
     }
 
     fun handleBackup() {
-        val backupData = BackupDataStore.getBackupData(context)
-
-        // no backup data available
-        if(backupData == null) {
-            errorOccurred = true
-            workDone = true
-            return
-        }
+//        val backupData = BackupDataStore.getBackupData(context)
+//
+//        // no backup data available
+//        if(backupData == null) {
+//            errorOccurred = true
+//            workDone = true
+//            return
+//        }
 
         val outputStream = mConnection.initBackup()
 
         outputStream?.use { stream ->
-            stream.write(backupData.toByteArray(Charsets.UTF_8))
+            BackupManager.backupCreator?.writeBackup(context, stream)
         }
 
         mConnection.sendBackupData()
@@ -99,27 +100,22 @@ class ConnectBackupWorker(val context : Context, params: WorkerParameters) : Cor
         var restoreData : String? = null
 
         stream?.use {
-            restoreData = it.readString()
+            BackupManager.backupRestorer?.restoreBackup(context, it)
         }
 
-        // something went wrong
-        if(restoreData == null) {
-            errorOccurred = true
-            workDone = true
-            return
-        }
-
-        Log.d(TAG, "Received restore data: $restoreData")
-
-        // save restore data
-        BackupDataStore.saveRestoreData(context, restoreData!!)
+//        // something went wrong
+//        if(!BackupDataStore.isRestoreDataSaved(context)) {
+//            errorOccurred = true
+//            workDone = true
+//            return
+//        }
 
         // enqueue restore worker
-        val restoreBackupWorker = OneTimeWorkRequest.Builder(RestoreBackupWorker::class.java)
-            .addTag("org.secuso.privacyfriendlybackup.api.RestoreBackupWork")
-            .build()
-        WorkManager.getInstance(context)
-            .beginUniqueWork("org.secuso.privacyfriendlybackup.api.ConnectBackupWork", ExistingWorkPolicy.APPEND, restoreBackupWorker).enqueue()
+//        val restoreBackupWorker = OneTimeWorkRequest.Builder(RestoreBackupWorker::class.java)
+//            .addTag("org.secuso.privacyfriendlybackup.api.RestoreBackupWork")
+//            .build()
+//        WorkManager.getInstance(context)
+//            .beginUniqueWork("org.secuso.privacyfriendlybackup.api.ConnectBackupWork", ExistingWorkPolicy.APPEND, restoreBackupWorker).enqueue()
     }
 
     override suspend fun doWork(): Result {
