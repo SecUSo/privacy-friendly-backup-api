@@ -37,6 +37,11 @@ object DatabaseUtil {
         writer.beginArray()
         val tableInfo = getTables(db)
         for(table in tableInfo) {
+            // do not write android_metadata, as this table will automatically be created when restoring
+            if(table.first == "android_metadata") {
+                continue
+            }
+
             writer.beginObject()
             writer.name("tableName").value(table.first)
             writer.name("createSql").value(table.second)

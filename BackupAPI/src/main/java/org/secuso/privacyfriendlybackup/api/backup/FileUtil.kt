@@ -93,7 +93,9 @@ object FileUtil {
 
     @JvmStatic
     fun copyFile(inputFile: File, outputFile: File) {
-        outputFile.copyInputStreamToFile(inputFile.inputStream())
+        inputFile.inputStream().use {
+            outputFile.copyInputStreamToFile(it)
+        }
     }
 
 }

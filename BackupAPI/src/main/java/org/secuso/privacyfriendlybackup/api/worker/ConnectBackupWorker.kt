@@ -2,14 +2,15 @@ package org.secuso.privacyfriendlybackup.api.worker
 
 import android.content.ContentValues.TAG
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
-import android.os.Message
-import android.os.Messenger
+import android.os.*
 import android.util.Log
 import androidx.work.*
 import androidx.work.CoroutineWorker
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.secuso.privacyfriendlybackup.api.IBackupService
 import org.secuso.privacyfriendlybackup.api.pfa.BackupDataStore
 import org.secuso.privacyfriendlybackup.api.common.BackupApi.ACTION_SEND_MESSENGER
@@ -22,15 +23,20 @@ import org.secuso.privacyfriendlybackup.api.common.PfaError
 import org.secuso.privacyfriendlybackup.api.pfa.BackupManager
 import org.secuso.privacyfriendlybackup.api.util.BackupApiConnection
 import org.secuso.privacyfriendlybackup.api.util.readString
+import java.io.InputStream
+import java.io.OutputStream
+import java.lang.Exception
 import java.lang.ref.WeakReference
 import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.coroutines.CoroutineContext
 
 /**
  * @author Christopher Beckmann
  */
 class ConnectBackupWorker(val context : Context, params: WorkerParameters) : CoroutineWorker(context, params), BackupApiConnection.IBackupApiListener {
 
-    val TAG = "PFABackup"
+    val TAG = "PFA Backup"
 
     var mConnection : BackupApiConnection =
         BackupApiConnection(
@@ -44,29 +50,34 @@ class ConnectBackupWorker(val context : Context, params: WorkerParameters) : Cor
     var workDone = false
     var errorOccurred = false
 
+    var backupInProgress = AtomicBoolean(false)
+    var restoreInProgress = AtomicBoolean(false)
+
     internal class MessageHandler(worker : ConnectBackupWorker) : Handler(Looper.getMainLooper()) {
         val worker = WeakReference(worker)
+
+        val TAG = "PFA Backup"
 
         override fun handleMessage(msg: Message) {
             Executors.newSingleThreadExecutor().run {
                 when (msg.what) {
                     MESSAGE_BACKUP -> {
-                        Log.d(TAG, "\n\t[Message: MESSAGE_BACKUP($MESSAGE_BACKUP)]")
+                        Log.d(TAG, "\t[Message: MESSAGE_BACKUP($MESSAGE_BACKUP)]")
                         worker.get()?.handleBackup()
                     }
                     MESSAGE_RESTORE -> {
-                        Log.d(TAG, "\n\t[Message: MESSAGE_RESTORE($MESSAGE_RESTORE)]")
+                        Log.d(TAG, "\t[Message: MESSAGE_RESTORE($MESSAGE_RESTORE)]")
                         worker.get()?.handleRestore()
                     }
                     MESSAGE_ERROR -> {
-                        Log.d(TAG, "\n\t[Message: MESSAGE_ERROR($MESSAGE_ERROR)]")
+                        Log.d(TAG, "\t[Message: MESSAGE_ERROR($MESSAGE_ERROR)]")
                     }
                     MESSAGE_DONE -> {
-                        Log.d(TAG, "\n\t[Message: MESSAGE_DONE($MESSAGE_DONE)]")
+                        Log.d(TAG, "\t[Message: MESSAGE_DONE($MESSAGE_DONE)]")
                         worker.get()?.workDone = true
                     }
                     else -> {
-                        Log.d(TAG, "\n\t[Message: Unknown(${msg.what})]")
+                        Log.d(TAG, "\t[Message: Unknown(${msg.what})]")
                         worker.get()?.errorOccurred = true
                         worker.get()?.workDone = true
                     }
@@ -76,25 +87,44 @@ class ConnectBackupWorker(val context : Context, params: WorkerParameters) : Cor
     }
 
     fun handleBackup() {
-//        val backupData = BackupDataStore.getBackupData(context)
-//
-//        // no backup data available
-//        if(backupData == null) {
-//            errorOccurred = true
-//            workDone = true
-//            return
-//        }
+        Log.d(TAG, "handleBackup() started")
+        backupInProgress.set(true)
 
-        val outputStream = mConnection.initBackup()
+        Log.d(TAG, "Retrieve backup from storage")
+        var backupData = BackupDataStore.getBackupData(context)
 
-        outputStream?.use { stream ->
-            BackupManager.backupCreator?.writeBackup(context, stream)
+        // no backup data available
+        Log.d(TAG, "Check if backup data is available")
+        if (backupData == null) {
+            Log.d(TAG, "ERROR: Backup data is null")
+            errorOccurred = true
+            workDone = true
+            return
         }
 
+        Log.d(TAG, "Creating pipe")
+        val outputStream = mConnection.initBackup()
+
+        Log.d(TAG, "Writing backup data to pipe")
+
+        GlobalScope.launch(IO) {
+            outputStream?.use { stream ->
+                backupData.use {
+                    it.copyTo(stream)
+                }
+            }
+        }
+        //BackupManager.backupCreator?.writeBackup(context, stream)
+
+        Log.d(TAG, "Sending backup data to Backup service")
         mConnection.sendBackupData()
+        backupInProgress.set(false)
+
+        Log.d(TAG, "handleBackup() finished")
     }
 
     fun handleRestore() {
+        restoreInProgress.set(true)
         val stream = mConnection.getRestoreData()
 
         var restoreData : String? = null
@@ -102,6 +132,8 @@ class ConnectBackupWorker(val context : Context, params: WorkerParameters) : Cor
         stream?.use {
             BackupManager.backupRestorer?.restoreBackup(context, it)
         }
+
+        restoreInProgress.set(false)
 
 //        // something went wrong
 //        if(!BackupDataStore.isRestoreDataSaved(context)) {
@@ -127,6 +159,8 @@ class ConnectBackupWorker(val context : Context, params: WorkerParameters) : Cor
         do {
             delay(1000)
         } while(!workDone && --timeout > 0)
+
+        Log.d(TAG, "Work is done! YAY")
 
         if(mConnection.isBound()) {
             mConnection.disconnect()

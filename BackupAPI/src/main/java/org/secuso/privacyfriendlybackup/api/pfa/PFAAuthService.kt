@@ -5,6 +5,7 @@ import android.os.Binder
 import android.util.Log
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import org.secuso.privacyfriendlybackup.api.IPFAService
 import org.secuso.privacyfriendlybackup.api.common.AbstractAuthService
@@ -44,6 +45,8 @@ import java.util.concurrent.Executors
  */
 abstract class PFAAuthService : AbstractAuthService() {
 
+    val TAG = "PFA AuthService"
+
     val executor = Executors.newSingleThreadExecutor()
 
     override val SUPPORTED_API_VERSIONS = listOf(1)
@@ -81,28 +84,37 @@ abstract class PFAAuthService : AbstractAuthService() {
             val backupPackageName = data.getStringExtra(EXTRA_CONNECT_PACKAGE_NAME)
             val connectImmediately = data.getBooleanExtra(EXTRA_CONNECT_IMMEDIATE, false)
 
-            startBackupProcess()
-
-            return Intent().apply {
-                putExtra(RESULT_CODE, RESULT_CODE_SUCCESS)
-            }
+            return if(startBackupProcess())
+                Intent().apply {
+                    putExtra(RESULT_CODE, RESULT_CODE_SUCCESS)
+                }
+            else
+                Intent().apply {
+                    putExtra(RESULT_CODE, RESULT_CODE_ERROR)
+                }
         }
     }
 
-    private fun startBackupProcess() {
-        executor.run {
-//            val backupWork = OneTimeWorkRequest.Builder(CreateBackupWorker::class.java)
-//                .addTag("org.secuso.privacyfriendlybackup.api.CreateBackupWork")
-//                //.setConstraints(Constraints.Builder().setRequiresBatteryNotLow(true).build())
-//                .build()
+    private fun startBackupProcess() : Boolean {
+        val backupWork = OneTimeWorkRequest.Builder(CreateBackupWorker::class.java)
+            //.addTag("org.secuso.privacyfriendlybackup.api.CreateBackupWork")
+            //.setConstraints(Constraints.Builder().setRequiresBatteryNotLow(true).build())
+            .build()
 
-            val connectWork = OneTimeWorkRequest.Builder(ConnectBackupWorker::class.java)
-                .addTag("org.secuso.privacyfriendlybackup.api.ConnectBackupWork")
-                .build()
+        val connectWork = OneTimeWorkRequest.Builder(ConnectBackupWorker::class.java)
+            //.addTag("org.secuso.privacyfriendlybackup.api.ConnectBackupWork")
+            .build()
 
-            WorkManager.getInstance(this@PFAAuthService)
-                    .beginUniqueWork("org.secuso.privacyfriendlybackup.api.ConnectBackupWork", ExistingWorkPolicy.KEEP, connectWork)
-                    .enqueue()
-        }
+        WorkManager.getInstance(this@PFAAuthService)
+                .beginUniqueWork("org.secuso.privacyfriendlybackup.api.ConnectBackupWork", ExistingWorkPolicy.KEEP, backupWork).then(connectWork)
+                .enqueue()
+
+        val workInfo = WorkManager.getInstance(this@PFAAuthService).getWorkInfoById(backupWork.id).get()
+                ?: return false
+
+        Log.d(TAG, "CreateBackupWorker: ${workInfo.state.name}")
+        return workInfo.state == WorkInfo.State.SUCCEEDED
+                || workInfo.state == WorkInfo.State.ENQUEUED
+                || workInfo.state == WorkInfo.State.RUNNING
     }
 }
