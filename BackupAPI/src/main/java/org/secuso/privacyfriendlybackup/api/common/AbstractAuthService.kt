@@ -12,6 +12,8 @@ import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.RESULT_ERR
 import org.secuso.privacyfriendlybackup.api.util.AuthenticationHelper
 
 /**
+ * Base class that provides a function that checks for permissions and API versions.
+ *
  * @author Christopher Beckmann
  */
 abstract class AbstractAuthService : Service() {

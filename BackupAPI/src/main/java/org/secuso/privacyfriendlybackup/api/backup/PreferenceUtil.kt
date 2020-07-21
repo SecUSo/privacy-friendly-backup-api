@@ -3,8 +3,11 @@ package org.secuso.privacyfriendlybackup.api.backup
 import android.content.SharedPreferences
 import android.util.JsonWriter
 
+/**
+ * This is a convenience class, that provides utility methods to write preferences to json.
+ * @author Christopher Beckmann (Kamuno)
+ */
 object PreferenceUtil {
-
     @JvmStatic
     fun writePreferences(writer: JsonWriter, pref: SharedPreferences) {
         writer.beginObject()
@@ -30,5 +33,4 @@ object PreferenceUtil {
         }
         writer.endObject()
     }
-
 }

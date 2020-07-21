@@ -14,12 +14,13 @@ import java.io.StringReader
 import java.io.StringWriter
 
 /**
- * This class turns a database into a JSON string
+ * This is a convenience class, that provides utility methods to write databases to json.
  * <p>
- * Structure based on http://tech.sarathdr.com/android-app/convert-database-cursor-result-to-json-array-android-app-development/
- * accessed at 25th December 2016
+ * Structure based on
+ * https://github.com/SecUSo/privacy-friendly-app-example/blob/79b6ccbe81062142091196b592121ed9384c7466/app/src/main/java/org/secuso/privacyfriendlyexample/database/DatabaseExporter.java
+ * Original class by Karola Marky (yonjuni)
  *
- * @author Karola Marky (yonjuni), Christopher Beckmann (Kamuno)
+ * @author Christopher Beckmann (Kamuno)
  */
 object DatabaseUtil {
 

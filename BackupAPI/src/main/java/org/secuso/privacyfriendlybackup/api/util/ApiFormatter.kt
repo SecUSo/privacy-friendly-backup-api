@@ -2,6 +2,9 @@ package org.secuso.privacyfriendlybackup.api.util
 
 import android.content.Intent
 
+/**
+ * @author Christopher Beckmann
+ */
 object ApiFormatter {
 
     fun formatIntent(intent: Intent?) : String {

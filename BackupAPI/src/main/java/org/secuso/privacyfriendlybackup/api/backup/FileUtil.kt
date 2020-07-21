@@ -8,6 +8,9 @@ import org.secuso.privacyfriendlybackup.api.util.toBase64
 import java.io.File
 import java.lang.RuntimeException
 
+/**
+ * @author Christopher Beckmann (Kamuno)
+ */
 object FileUtil {
 
     @JvmStatic
