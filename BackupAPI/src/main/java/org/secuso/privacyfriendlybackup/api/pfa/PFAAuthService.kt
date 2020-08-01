@@ -102,11 +102,17 @@ abstract class PFAAuthService : AbstractAuthService() {
             .build()
 
         val connectWork = OneTimeWorkRequest.Builder(ConnectBackupWorker::class.java)
-            //.addTag("org.secuso.privacyfriendlybackup.api.ConnectBackupWork")
+            .addTag("org.secuso.privacyfriendlybackup.api.ConnectBackupWork")
             .build()
 
+        // if connection is already running - don't cancel it
+        val connectInfo = WorkManager.getInstance(this@PFAAuthService).getWorkInfosByTag("org.secuso.privacyfriendlybackup.api.ConnectBackupWork").get()
+        if(connectInfo != null && connectInfo.isNotEmpty() && connectInfo[0].state == WorkInfo.State.RUNNING) {
+            return true
+        }
+
         WorkManager.getInstance(this@PFAAuthService)
-                .beginUniqueWork("org.secuso.privacyfriendlybackup.api.ConnectBackupWork", ExistingWorkPolicy.KEEP, backupWork).then(connectWork)
+                .beginUniqueWork("org.secuso.privacyfriendlybackup.api.ConnectBackupWork", ExistingWorkPolicy.REPLACE, backupWork).then(connectWork)
                 .enqueue()
 
         val workInfo = WorkManager.getInstance(this@PFAAuthService).getWorkInfoById(backupWork.id).get()
