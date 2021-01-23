@@ -2,12 +2,12 @@ package org.secuso.privacyfriendlybackup.api.util
 
 import android.content.pm.Signature
 import android.util.Base64
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import java.io.File
 import java.io.InputStream
 import java.security.MessageDigest
+
 
 fun InputStream.readString() : String {
     return this.use {
@@ -51,6 +51,12 @@ fun ByteArray.toHex() : String {
     return result.toString()
 }
 
+fun ByteArray.hash(algorithm: String) : ByteArray {
+    val md = MessageDigest.getInstance(algorithm)
+    md.update(this)
+    return md.digest()
+}
+
 fun InputStream.toFile(path: String) {
     File(path).outputStream().use { this.copyTo(it) }
 }
@@ -61,7 +67,11 @@ fun File.copyInputStreamToFile(inputStream: InputStream) {
     }
 }
 
-fun <T, K, R> MediatorLiveData<R>.addSources(liveData1: LiveData<T>, liveData2: LiveData<K>, block: (T?, K?) -> R): MediatorLiveData<R> {
+fun <T, K, R> MediatorLiveData<R>.addSources(
+    liveData1: LiveData<T>,
+    liveData2: LiveData<K>,
+    block: (T?, K?) -> R
+): MediatorLiveData<R> {
     this.addSource(liveData1) {
         this.value = block.invoke(liveData1.value, liveData2.value)
     }
