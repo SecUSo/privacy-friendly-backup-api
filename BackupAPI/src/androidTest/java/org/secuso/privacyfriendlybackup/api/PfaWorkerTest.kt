@@ -22,6 +22,8 @@ import org.secuso.privacyfriendlybackup.api.pfa.IBackupCreator
 import org.secuso.privacyfriendlybackup.api.pfa.IBackupRestorer
 import org.secuso.privacyfriendlybackup.api.worker.CreateBackupWorker
 import org.secuso.privacyfriendlybackup.api.worker.RestoreBackupWorker
+import java.io.InputStream
+import java.io.OutputStream
 import java.util.concurrent.Executors
 
 /**
@@ -43,16 +45,18 @@ class PfaWorkerTest {
         workManager = WorkManager.getInstance(appContext)
 
         BackupManager.backupRestorer = object : IBackupRestorer {
-            override fun restoreBackup(context: Context, restoreData: String): Boolean {
+            override fun restoreBackup(context: Context, restoreData: InputStream): Boolean {
                 Thread.sleep(1000)
+                Log.d("BACKUP CREATOR", "createBackup called.")
                 return true
             }
         }
 
         BackupManager.backupCreator = object : IBackupCreator {
-            override fun createBackup(context: Context): String {
+            override fun writeBackup(context: Context, outputStream: OutputStream) {
                 Thread.sleep(1000)
-                return "{ 'test': [] }"
+                Log.d("BACKUP RESTORER", "restoreBackup called.")
+                outputStream.write("{ 'test': [] }".toByteArray())
             }
         }
     }
@@ -77,7 +81,7 @@ class PfaWorkerTest {
 
     @Test
     fun testRestoreBackupWorker() {
-        BackupDataStore.saveRestoreData(appContext, "{ 'test': [] }")
+        BackupDataStore.saveRestoreData(appContext, "{ 'test': [] }".byteInputStream())
         assertEquals(WorkInfo.State.SUCCEEDED, runWorker<RestoreBackupWorker>().state)
     }
 

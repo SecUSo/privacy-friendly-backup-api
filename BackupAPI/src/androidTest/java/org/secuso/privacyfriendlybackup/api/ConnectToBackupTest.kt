@@ -20,6 +20,8 @@ import org.secuso.privacyfriendlybackup.api.pfa.IBackupCreator
 import org.secuso.privacyfriendlybackup.api.pfa.IBackupRestorer
 import org.secuso.privacyfriendlybackup.api.worker.ConnectBackupWorker
 import org.secuso.privacyfriendlybackup.api.worker.CreateBackupWorker
+import java.io.InputStream
+import java.io.OutputStream
 import java.util.concurrent.Executors
 
 @RunWith(AndroidJUnit4::class)
@@ -36,7 +38,7 @@ class ConnectToBackupTest {
         workManager = WorkManager.getInstance(appContext)
 
         BackupManager.backupRestorer = object : IBackupRestorer {
-            override fun restoreBackup(context: Context, restoreData: String): Boolean {
+            override fun restoreBackup(context: Context, restoreData: InputStream): Boolean {
                 Thread.sleep(1000)
                 Log.d("BACKUP CREATOR", "createBackup called.")
                 return true
@@ -44,10 +46,10 @@ class ConnectToBackupTest {
         }
 
         BackupManager.backupCreator = object : IBackupCreator {
-            override fun createBackup(context: Context): String {
+            override fun writeBackup(context: Context, outputStream: OutputStream) {
                 Thread.sleep(1000)
                 Log.d("BACKUP RESTORER", "restoreBackup called.")
-                return "{ 'test': [] }"
+                outputStream.write("{ 'test': [] }".toByteArray())
             }
         }
     }
