@@ -152,7 +152,13 @@ object DatabaseUtil {
             val cv = ContentValues()
             while(reader.hasNext()) {
                 val name = reader.nextName()
-                val value = reader.nextString()
+                val isNotNull = reader.peek() != JsonToken.NULL
+                val value = if(isNotNull) {
+                    reader.nextString()
+                } else {
+                    reader.nextNull()
+                    null
+                }
                 cv.put(name, value)
             }
             db.insert(tableName, null, cv)
