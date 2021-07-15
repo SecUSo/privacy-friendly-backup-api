@@ -5,6 +5,7 @@ import android.database.Cursor.*
 import android.database.sqlite.SQLiteDatabase
 import android.util.JsonReader
 import android.util.JsonWriter
+import android.util.JsonToken
 import androidx.core.database.getBlobOrNull
 import androidx.core.database.getFloatOrNull
 import androidx.core.database.getIntOrNull
