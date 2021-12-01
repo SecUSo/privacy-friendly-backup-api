@@ -1,6 +1,7 @@
 package org.secuso.privacyfriendlybackup.api.backup
 
 import android.content.ContentValues
+import android.content.Context
 import android.database.Cursor.*
 import android.database.sqlite.SQLiteDatabase
 import android.util.JsonReader
@@ -166,6 +167,17 @@ object DatabaseUtil {
             reader.endObject()
         }
         reader.endArray()
+    }
+
+    @JvmStatic
+    fun deleteRoomDatabase(context : Context, databaseName: String) {
+        val databaseFile = context.getDatabasePath(databaseName)
+        val databaseFileWal = context.getDatabasePath("$databaseName-wal")
+        val databaseFileShm = context.getDatabasePath("$databaseName-shm")
+
+        databaseFile.delete()
+        databaseFileShm.delete()
+        databaseFileWal.delete()
     }
 
 }
