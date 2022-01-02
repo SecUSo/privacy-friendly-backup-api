@@ -11,6 +11,7 @@ import androidx.core.database.getBlobOrNull
 import androidx.core.database.getFloatOrNull
 import androidx.core.database.getLongOrNull
 import androidx.core.database.getStringOrNull
+import androidx.sqlite.db.SupportSQLiteDatabase
 import org.secuso.privacyfriendlybackup.api.util.toBase64
 import java.io.StringWriter
 
@@ -26,7 +27,7 @@ import java.io.StringWriter
 object DatabaseUtil {
 
     @JvmStatic
-    fun writeDatabase(writer: JsonWriter, db: SQLiteDatabase) {
+    fun writeDatabase(writer: JsonWriter, db: SupportSQLiteDatabase) {
         writer.beginObject()
         writer.name("version").value(db.version)
         writer.name("content")
@@ -35,7 +36,7 @@ object DatabaseUtil {
     }
 
     @JvmStatic
-    fun writeDatabaseContent(writer: JsonWriter, db : SQLiteDatabase) {
+    fun writeDatabaseContent(writer: JsonWriter, db : SupportSQLiteDatabase) {
         writer.beginArray()
         val tableInfo = getTables(db)
         for(table in tableInfo) {
@@ -55,10 +56,10 @@ object DatabaseUtil {
     }
 
     @JvmStatic
-    fun getTables(db : SQLiteDatabase) : List<Pair<String, String?>> {
+    fun getTables(db : SupportSQLiteDatabase) : List<Pair<String, String?>> {
         val resultList = ArrayList<Pair<String, String?>>()
 
-        db.query("sqlite_master", arrayOf("name", "sql"), "type = ?", arrayOf("table"), null, null, null).use { cursor ->
+        db.query("SELECT name, sql FROM sqlite_master WHERE type='table'").use { cursor ->
             cursor.moveToFirst()
             while(!cursor.isAfterLast) {
                 val name = cursor.getStringOrNull(cursor.getColumnIndex("name")) ?: ""
@@ -71,9 +72,9 @@ object DatabaseUtil {
     }
 
     @JvmStatic
-    fun writeTable(writer: JsonWriter, db : SQLiteDatabase, table: String) {
+    fun writeTable(writer: JsonWriter, db : SupportSQLiteDatabase, table: String) {
         writer.beginArray()
-        db.query(table, null, null, null, null, null, null).use { cursor ->
+        db.query("SELECT * FROM $table").use { cursor ->
             cursor.moveToFirst()
             while(!cursor.isAfterLast) {
                 writer.beginObject()
@@ -112,7 +113,7 @@ object DatabaseUtil {
     }
 
     @JvmStatic
-    fun readDatabaseContent(reader: JsonReader, db: SQLiteDatabase) {
+    fun readDatabaseContent(reader: JsonReader, db: SupportSQLiteDatabase) {
         reader.beginArray()
 
         while(reader.hasNext()) {
@@ -123,7 +124,7 @@ object DatabaseUtil {
     }
 
     @JvmStatic
-    fun readTable(reader: JsonReader, db: SQLiteDatabase) {
+    fun readTable(reader: JsonReader, db: SupportSQLiteDatabase) {
         reader.beginObject()
 
         // tableName
@@ -146,7 +147,7 @@ object DatabaseUtil {
     }
 
     @JvmStatic
-    fun readValues(reader: JsonReader, db: SQLiteDatabase, tableName: String) {
+    fun readValues(reader: JsonReader, db: SupportSQLiteDatabase, tableName: String) {
         reader.beginArray()
         while(reader.hasNext()) {
             reader.beginObject()
@@ -162,7 +163,7 @@ object DatabaseUtil {
                 }
                 cv.put(name, value)
             }
-            db.insert(tableName, null, cv)
+            db.insert(tableName, SQLiteDatabase.CONFLICT_NONE, cv)
             reader.endObject()
         }
         reader.endArray()
@@ -181,14 +182,14 @@ object DatabaseUtil {
 
 }
 
-fun SQLiteDatabase.toJSON() : String {
+fun SupportSQLiteDatabase.toJSON() : String {
     val writer = JsonWriter(StringWriter())
     writer.setIndent("")
     DatabaseUtil.writeDatabase(writer, this)
     return writer.toString()
 }
 
-fun SQLiteDatabase.toReadableJSON() : String {
+fun SupportSQLiteDatabase.toReadableJSON() : String {
     val writer = JsonWriter(StringWriter())
     writer.setIndent("  ")
     DatabaseUtil.writeDatabase(writer, this)

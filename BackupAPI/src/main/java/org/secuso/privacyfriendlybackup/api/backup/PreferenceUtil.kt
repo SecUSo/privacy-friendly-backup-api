@@ -10,8 +10,18 @@ import android.util.JsonWriter
 object PreferenceUtil {
     @JvmStatic
     fun writePreferences(writer: JsonWriter, pref: SharedPreferences) {
+        writePreferences(writer, pref, emptyArray())
+    }
+
+    @JvmStatic
+    fun writePreferences(writer: JsonWriter, pref: SharedPreferences, excludedKeys: Array<String>) {
         writer.beginObject()
         for((key, value) in pref.all) {
+            // Continue if key-value pair should be excluded from the backup
+            if(key in excludedKeys) {
+                continue
+            }
+
             writer.name(key)
 
             // App should know the types of the keys when it sees them.
