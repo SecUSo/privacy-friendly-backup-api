@@ -5,14 +5,13 @@ import android.content.Context
 import android.database.Cursor.*
 import android.database.sqlite.SQLiteDatabase
 import android.util.JsonReader
-import android.util.JsonWriter
 import android.util.JsonToken
+import android.util.JsonWriter
 import androidx.core.database.getBlobOrNull
 import androidx.core.database.getFloatOrNull
-import androidx.core.database.getIntOrNull
+import androidx.core.database.getLongOrNull
 import androidx.core.database.getStringOrNull
 import org.secuso.privacyfriendlybackup.api.util.toBase64
-import java.io.StringReader
 import java.io.StringWriter
 
 /**
@@ -86,7 +85,7 @@ object DatabaseUtil {
                                 writer.value(cursor.getStringOrNull(i))
                             }
                             FIELD_TYPE_INTEGER ->   {
-                                writer.value(cursor.getIntOrNull(i))
+                                writer.value(cursor.getLongOrNull(i))
                             }
                             FIELD_TYPE_FLOAT ->     {
                                 writer.value(cursor.getFloatOrNull(i))
