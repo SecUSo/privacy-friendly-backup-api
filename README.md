@@ -42,8 +42,10 @@ The app uses icons from [Google Design Material Icons](https://design.google.com
 
 ## Contributors
 
-Christopher Beckmann (Kamuno) <br />
-
 ### App Icon
 Hangyan Chen <br />
+
+<a href="https://github.com/SecUSo/privacy-friendly-backup-api/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=SecUSo/privacy-friendly-backup-api&max=100&columns=20" />
+</a>
 
