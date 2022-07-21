@@ -180,6 +180,22 @@ object DatabaseUtil {
         databaseFileWal.delete()
     }
 
+    @JvmStatic
+    fun deleteTables(db: SupportSQLiteDatabase) {
+        // get table names
+        val tableQuery = "SELECT name FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%';"
+        val cursor = db.query(tableQuery)
+        val tableNames = mutableListOf<String>()
+        while (cursor.moveToNext()) {
+            tableNames.add(cursor.getString(cursor.getColumnIndexOrThrow("name")))
+        }
+
+        // delete tables
+        for(name in tableNames) {
+            db.execSQL("DROP TABLE IF EXISTS $name")
+        }
+    }
+
 }
 
 fun SupportSQLiteDatabase.toJSON() : String {
