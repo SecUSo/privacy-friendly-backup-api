@@ -31,7 +31,7 @@ fun String.fromBase64() : ByteArray {
 }
 
 fun Signature.toHex() : String {
-    val md = MessageDigest.getInstance("SHA")
+    val md = MessageDigest.getInstance("SHA-256")
     md.update(this.toByteArray())
     return md.digest().toHex()
 }
