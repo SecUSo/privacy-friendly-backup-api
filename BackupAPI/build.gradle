@@ -50,5 +50,6 @@ dependencies {
     androidTestImplementation "androidx.work:work-testing:$work_version"
 
     implementation "androidx.sqlite:sqlite-ktx:2.2.0"
+    implementation 'androidx.sqlite:sqlite-framework:2.2.0'
 
 }

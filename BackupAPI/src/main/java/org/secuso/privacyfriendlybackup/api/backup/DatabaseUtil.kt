@@ -12,6 +12,8 @@ import androidx.core.database.getFloatOrNull
 import androidx.core.database.getLongOrNull
 import androidx.core.database.getStringOrNull
 import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.sqlite.db.SupportSQLiteOpenHelper
+import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import org.secuso.privacyfriendlybackup.api.util.toBase64
 import java.io.StringWriter
 
@@ -65,7 +67,7 @@ object DatabaseUtil {
                 val name = cursor.getStringOrNull(cursor.getColumnIndex("name")) ?: ""
                 val sql = cursor.getStringOrNull(cursor.getColumnIndex("sql"))
                 resultList.add(name to sql)
-                cursor.moveToNext();
+                cursor.moveToNext()
             }
         }
         return resultList
@@ -196,6 +198,18 @@ object DatabaseUtil {
         }
     }
 
+    @JvmStatic
+    fun getSupportSQLiteOpenHelper(context: Context, databaseName: String, version: Int) : SupportSQLiteOpenHelper {
+        val config = SupportSQLiteOpenHelper.Configuration.builder(context).apply {
+            name(databaseName)
+            callback(object : SupportSQLiteOpenHelper.Callback(version) {
+                override fun onCreate(db: SupportSQLiteDatabase) {}
+                override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {}
+            })
+        }.build()
+
+        return FrameworkSQLiteOpenHelperFactory().create(config)
+    }
 }
 
 fun SupportSQLiteDatabase.toJSON() : String {
