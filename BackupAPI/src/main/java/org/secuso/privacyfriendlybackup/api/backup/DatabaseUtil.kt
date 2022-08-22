@@ -17,6 +17,7 @@ import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import org.secuso.privacyfriendlybackup.api.util.toBase64
 import java.io.StringWriter
 
+
 /**
  * This is a convenience class, that provides utility methods to write databases to json.
  * <p>
@@ -199,7 +200,13 @@ object DatabaseUtil {
     }
 
     @JvmStatic
-    fun getSupportSQLiteOpenHelper(context: Context, databaseName: String, version: Int) : SupportSQLiteOpenHelper {
+    @JvmOverloads
+    fun getSupportSQLiteOpenHelper(context: Context, databaseName: String, version: Int = 0) : SupportSQLiteOpenHelper {
+        var version = version
+        if(version == 0) {
+            version = getVersion(context, databaseName)
+        }
+
         val config = SupportSQLiteOpenHelper.Configuration.builder(context).apply {
             name(databaseName)
             callback(object : SupportSQLiteOpenHelper.Callback(version) {
@@ -209,6 +216,16 @@ object DatabaseUtil {
         }.build()
 
         return FrameworkSQLiteOpenHelperFactory().create(config)
+    }
+
+    @JvmStatic
+    fun getVersion(context: Context, databaseName: String): Int {
+        val dataBase = SQLiteDatabase.openDatabase(
+            context.getDatabasePath(databaseName).path,
+            null,
+            SQLiteDatabase.OPEN_READONLY
+        )
+        return dataBase.version
     }
 }
 
