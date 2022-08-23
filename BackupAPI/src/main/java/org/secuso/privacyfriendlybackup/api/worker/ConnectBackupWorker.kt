@@ -1,6 +1,5 @@
 package org.secuso.privacyfriendlybackup.api.worker
 
-import android.content.ContentValues.TAG
 import android.content.Context
 import android.os.*
 import android.util.Log
@@ -10,26 +9,22 @@ import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.secuso.privacyfriendlybackup.api.IBackupService
+import org.secuso.privacyfriendlybackup.api.common.BackupApi
 import org.secuso.privacyfriendlybackup.api.pfa.BackupDataStore
 import org.secuso.privacyfriendlybackup.api.common.BackupApi.ACTION_SEND_MESSENGER
 import org.secuso.privacyfriendlybackup.api.common.BackupApi.MESSAGE_BACKUP
 import org.secuso.privacyfriendlybackup.api.common.BackupApi.MESSAGE_DONE
 import org.secuso.privacyfriendlybackup.api.common.BackupApi.MESSAGE_ERROR
 import org.secuso.privacyfriendlybackup.api.common.BackupApi.MESSAGE_RESTORE
+import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants
 import org.secuso.privacyfriendlybackup.api.common.PfaApi.EXTRA_CONNECT_PACKAGE_NAME
 import org.secuso.privacyfriendlybackup.api.common.PfaError
 import org.secuso.privacyfriendlybackup.api.pfa.BackupManager
 import org.secuso.privacyfriendlybackup.api.util.BackupApiConnection
-import org.secuso.privacyfriendlybackup.api.util.readString
-import java.io.InputStream
-import java.io.OutputStream
-import java.lang.Exception
 import java.lang.ref.WeakReference
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.coroutines.CoroutineContext
 
 /**
  * @author Christopher Beckmann
@@ -90,6 +85,12 @@ class ConnectBackupWorker(val context : Context, params: WorkerParameters) : Cor
         Log.d(TAG, "handleBackup() started")
         backupInProgress.set(true)
 
+        if(checkAndSendError()) {
+            errorOccurred = true
+            workDone = true
+            return
+        }
+
         Log.d(TAG, "Retrieve backup from storage")
         var backupData = BackupDataStore.getBackupData(context)
 
@@ -97,6 +98,7 @@ class ConnectBackupWorker(val context : Context, params: WorkerParameters) : Cor
         Log.d(TAG, "Check if backup data is available")
         if (backupData == null) {
             Log.d(TAG, "ERROR: Backup data is null")
+            sendError()
             errorOccurred = true
             workDone = true
             return
@@ -123,8 +125,29 @@ class ConnectBackupWorker(val context : Context, params: WorkerParameters) : Cor
         Log.d(TAG, "handleBackup() finished")
     }
 
+    private fun checkAndSendError() : Boolean {
+        // check if an error occured and we need to send it to the backup app
+        if(inputData.getInt(CommonApiConstants.RESULT_CODE, CommonApiConstants.RESULT_CODE_SUCCESS) == CommonApiConstants.RESULT_CODE_ERROR) {
+            sendError()
+            return true
+        }
+        return false
+    }
+
+    private fun sendError() {
+        mConnection.send(BackupApi.ACTION_SEND_ERROR, Bundle().apply {
+            putInt(BackupApi.EXTRA_ERROR, BackupApi.ERROR_GENERIC)
+        })
+    }
+
     fun handleRestore() {
         restoreInProgress.set(true)
+
+        if(checkAndSendError()) {
+            errorOccurred = true
+            workDone = true
+        }
+
         val stream = mConnection.getRestoreData()
 
         var restoreData : String? = null

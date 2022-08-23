@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.os.Bundle
 import android.os.IBinder
 import android.os.Messenger
 import android.os.ParcelFileDescriptor
@@ -57,7 +58,7 @@ class BackupApiConnection(
         }
     }
 
-    fun send(action : String) {
+    fun send(action : String, extras : Bundle? = null) {
         if(!isBound()) {
             mBackupApiListener?.onError(
                 PfaError(
@@ -69,6 +70,7 @@ class BackupApiConnection(
         }
         val result : Intent = mService!!.send(Intent().apply {
             putExtra(EXTRA_API_VERSION, mApiVersion)
+            extras?.let { putExtras(extras) }
             setAction(action)
         })
 

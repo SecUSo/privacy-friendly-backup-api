@@ -11,5 +11,5 @@ import java.io.OutputStream
  * @author Christopher Beckmann
  */
 interface IBackupCreator {
-    fun writeBackup(context: Context, outputStream: OutputStream)
+    fun writeBackup(context: Context, outputStream: OutputStream) : Boolean
 }
