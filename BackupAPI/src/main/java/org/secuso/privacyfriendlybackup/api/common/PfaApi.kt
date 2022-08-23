@@ -52,20 +52,25 @@ object PfaApi {
 
 object BackupApi {
     // API Version
-    const val API_VERSION = 1
+    const val API_VERSION = 2
 
     // Connect Actions
     const val BACKUP_CONNECT_ACTION = "org.secuso.privacyfriendlybackup.services.BackupService"
 
     // Command Actions
     const val ACTION_SEND_MESSENGER = "BackupApi.ACTION_SEND_MESSENGER"
+    const val ACTION_SEND_ERROR = "BackupApi.ACTION_SEND_ERROR"
 
     // Extras
     const val EXTRA_MESSENGER = "BackupApi.EXTRA_MESSENGER"
+    const val EXTRA_ERROR = "BackupApi.EXTRA_ERROR"
 
     // Messenger Commands
     const val MESSAGE_BACKUP = 1
     const val MESSAGE_RESTORE = 2
     const val MESSAGE_DONE = 3
     const val MESSAGE_ERROR = 4
+
+    // Error Types
+    const val ERROR_GENERIC = 0
 }
