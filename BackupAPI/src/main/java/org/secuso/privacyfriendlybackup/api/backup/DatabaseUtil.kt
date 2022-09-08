@@ -2,6 +2,7 @@ package org.secuso.privacyfriendlybackup.api.backup
 
 import android.content.ContentValues
 import android.content.Context
+import android.database.Cursor
 import android.database.Cursor.*
 import android.database.sqlite.SQLiteDatabase
 import android.util.JsonReader
@@ -14,6 +15,7 @@ import androidx.core.database.getStringOrNull
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
+import org.secuso.privacyfriendlybackup.api.util.fromBase64
 import org.secuso.privacyfriendlybackup.api.util.toBase64
 import java.io.StringWriter
 
@@ -152,6 +154,15 @@ object DatabaseUtil {
     @JvmStatic
     fun readValues(reader: JsonReader, db: SupportSQLiteDatabase, tableName: String) {
         reader.beginArray()
+
+        val typeMap = mutableMapOf<String, Int>()
+
+        db.query("SELECT * from $tableName").let {
+            for(name in it.columnNames) {
+                typeMap[name] = it.getType(it.getColumnIndexOrThrow(name))
+            }
+        }
+
         while(reader.hasNext()) {
             reader.beginObject()
             val cv = ContentValues()
@@ -159,12 +170,33 @@ object DatabaseUtil {
                 val name = reader.nextName()
                 val isNotNull = reader.peek() != JsonToken.NULL
                 val value = if(isNotNull) {
-                    reader.nextString()
+                    when(typeMap[name]) {
+                        FIELD_TYPE_BLOB -> {
+                            reader.nextString().fromBase64()
+                        }
+                        FIELD_TYPE_STRING,
+                        FIELD_TYPE_FLOAT,
+                        FIELD_TYPE_INTEGER,
+                        FIELD_TYPE_NULL -> {
+                            reader.nextString()
+                        }
+                        else -> {
+                            reader.nextString()
+                        }
+                    }
                 } else {
                     reader.nextNull()
                     null
                 }
-                cv.put(name, value)
+
+                when (value) {
+                    is String -> {
+                        cv.put(name, value)
+                    }
+                    is ByteArray -> {
+                        cv.put(name, value)
+                    }
+                }
             }
             db.insert(tableName, SQLiteDatabase.CONFLICT_NONE, cv)
             reader.endObject()
