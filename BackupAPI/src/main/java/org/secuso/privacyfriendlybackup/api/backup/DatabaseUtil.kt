@@ -164,22 +164,16 @@ object DatabaseUtil {
             val inner = createSql.substring(createSql.indexOfFirst { it == '(' } + 1, createSql.indexOfLast { it == ')' })
             val columns = inner.split(',').map { it.trim() }
             for (column in columns) {
-                val indexFirstSpace = column.indexOfFirst { it == ' ' }
-                val indexSecondSpace = (column.substring(indexFirstSpace + 1, column.length).indexOfFirst { it == ' ' }.let {
-                    if (it == -1) {
-                        column.length
-                    } else {
-                        it + indexFirstSpace + 1
-                    }
-                })
-                val name = column.substring(0, indexFirstSpace).let {
+                val values = column.split(" ")
+                val name = values[0].let {
                     if (it.startsWith('`') && it.endsWith('`')) {
                         it.substring(1, it.length - 1)
                     } else {
                         it
                     }
                 }
-                val type = column.substring(indexFirstSpace + 1, indexSecondSpace).uppercase(Locale.US)
+
+                val type = values[1].uppercase(Locale.US)
                 typeMap[name] = when (type) {
                     "BLOB" -> FIELD_TYPE_BLOB
                     else -> FIELD_TYPE_STRING
