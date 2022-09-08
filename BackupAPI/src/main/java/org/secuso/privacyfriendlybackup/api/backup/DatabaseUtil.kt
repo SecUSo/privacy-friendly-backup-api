@@ -19,6 +19,7 @@ import org.secuso.privacyfriendlybackup.api.util.fromBase64
 import org.secuso.privacyfriendlybackup.api.util.toBase64
 import java.io.StringWriter
 import java.util.*
+import java.util.regex.Pattern
 import kotlin.collections.ArrayList
 
 
@@ -156,6 +157,11 @@ object DatabaseUtil {
         reader.endObject()
     }
 
+    /**
+     * Matches the sql column name and type in the create sql string
+     */
+    private val pattern : Pattern = Pattern.compile("^`?(?!FOREIGN)(.+?)`? (.+?)(?: |$)")
+
     @JvmStatic
     fun getTypes(createSql: String): MutableMap<String, Int> {
         var typeMap = mutableMapOf<String, Int>()
@@ -164,23 +170,20 @@ object DatabaseUtil {
             val inner = createSql.substring(createSql.indexOfFirst { it == '(' } + 1, createSql.indexOfLast { it == ')' })
             val columns = inner.split(',').map { it.trim() }
             for (column in columns) {
-                val values = column.split(" ")
-                val name = values[0].let {
-                    if (it.startsWith('`') && it.endsWith('`')) {
-                        it.substring(1, it.length - 1)
-                    } else {
-                        it
-                    }
-                }
+                val matcher = pattern.matcher(column)
 
-                val type = values[1].uppercase(Locale.US)
+                if(!matcher.matches()) continue
+
+                val name = matcher.group(1) ?: ""
+                val type = matcher.group(2)?.uppercase(Locale.US) ?: ""
+
                 typeMap[name] = when (type) {
                     "BLOB" -> FIELD_TYPE_BLOB
                     else -> FIELD_TYPE_STRING
                 }
             }
         } catch (e: Exception) {
-            typeMap = mutableMapOf<String, Int>()
+            return mutableMapOf()
         }
 
         return typeMap
