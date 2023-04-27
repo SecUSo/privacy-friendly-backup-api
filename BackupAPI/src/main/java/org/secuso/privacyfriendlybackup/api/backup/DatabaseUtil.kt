@@ -49,7 +49,7 @@ object DatabaseUtil {
         val tableInfo = getTables(db)
         for (table in tableInfo) {
             // do not write android_metadata, as this table will automatically be created when restoring
-            if (table.first == "android_metadata") {
+            if (table.first == "android_metadata" || table.first == "sqlite_sequence") {
                 continue
             }
 
