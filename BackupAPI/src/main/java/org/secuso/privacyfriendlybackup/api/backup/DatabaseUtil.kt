@@ -124,9 +124,15 @@ object DatabaseUtil {
     fun readDatabaseContent(reader: JsonReader, db: SupportSQLiteDatabase) {
         reader.beginArray()
 
+        // make sure that the sqlite_sequence table exists by creating a table with autoincrement and deleting it afterwards.
+        // Use of a randomly chosen uuid in the name to prevent collisions.
+        db.execSQL("CREATE TABLE 'tmp_backup_placeholder-03d8d15e-fb6f-4a62-a4a2-975a35a971ae' ('id' INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE);")
+
         while (reader.hasNext()) {
             readTable(reader, db)
         }
+
+        db.execSQL("DROP TABLE 'tmp_backup_placeholder-03d8d15e-fb6f-4a62-a4a2-975a35a971ae'")
 
         reader.endArray()
     }
