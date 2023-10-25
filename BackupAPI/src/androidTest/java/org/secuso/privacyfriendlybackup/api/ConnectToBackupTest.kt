@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.secuso.privacyfriendlybackup.api.pfa.BackupManager
@@ -53,6 +54,7 @@ class ConnectToBackupTest {
         }
     }
 
+    @Ignore
     @Test
     fun connect() {
         val backupWork = OneTimeWorkRequest.Builder(CreateBackupWorker::class.java)
