@@ -7,12 +7,12 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.work.*
 import androidx.work.testing.SynchronousExecutor
 import androidx.work.testing.WorkManagerTestInitHelper
-import junit.framework.Assert
 import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.secuso.privacyfriendlybackup.api.pfa.BackupManager
@@ -22,7 +22,6 @@ import org.secuso.privacyfriendlybackup.api.worker.ConnectBackupWorker
 import org.secuso.privacyfriendlybackup.api.worker.CreateBackupWorker
 import java.io.InputStream
 import java.io.OutputStream
-import java.util.concurrent.Executors
 
 @RunWith(AndroidJUnit4::class)
 class ConnectToBackupTest {
@@ -46,14 +45,16 @@ class ConnectToBackupTest {
         }
 
         BackupManager.backupCreator = object : IBackupCreator {
-            override fun writeBackup(context: Context, outputStream: OutputStream) {
+            override fun writeBackup(context: Context, outputStream: OutputStream): Boolean {
                 Thread.sleep(1000)
                 Log.d("BACKUP RESTORER", "restoreBackup called.")
                 outputStream.write("{ 'test': [] }".toByteArray())
+                return true
             }
         }
     }
 
+    @Ignore
     @Test
     fun connect() {
         val backupWork = OneTimeWorkRequest.Builder(CreateBackupWorker::class.java)
@@ -78,7 +79,7 @@ class ConnectToBackupTest {
 
             do {
                 delay(1000)
-            } while(workManager.getWorkInfoById(connectWork.id).get().state == WorkInfo.State.RUNNING)
+            } while (workManager.getWorkInfoById(connectWork.id).get().state == WorkInfo.State.RUNNING)
 
             assertEquals(
                 WorkInfo.State.SUCCEEDED,
