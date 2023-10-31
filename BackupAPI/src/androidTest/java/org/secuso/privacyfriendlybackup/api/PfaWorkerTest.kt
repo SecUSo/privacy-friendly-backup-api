@@ -53,10 +53,11 @@ class PfaWorkerTest {
         }
 
         BackupManager.backupCreator = object : IBackupCreator {
-            override fun writeBackup(context: Context, outputStream: OutputStream) {
+            override fun writeBackup(context: Context, outputStream: OutputStream): Boolean {
                 Thread.sleep(1000)
                 Log.d("BACKUP RESTORER", "restoreBackup called.")
                 outputStream.write("{ 'test': [] }".toByteArray())
+                return true
             }
         }
     }
