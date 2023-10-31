@@ -1,5 +1,22 @@
 # Changelog
 
+<a name="v1.3.0"></a>
+## [Backup App Interface Library v1.3.0](https://github.com/SecUSo/privacy-friendly-backup-api/releases/tag/v1.3.0) - 31 Oct 2023
+
+## What's Changed
+* Fix type signature of `writeBackup` in androidTest by [@udenr](https://github.com/udenr) in https://github.com/SecUSo/privacy-friendly-backup-api/pull/11
+* Add CI workflows by [@udenr](https://github.com/udenr) in https://github.com/SecUSo/privacy-friendly-backup-api/pull/12
+* Update gradle and target sdk by [@udenr](https://github.com/udenr) in https://github.com/SecUSo/privacy-friendly-backup-api/pull/13
+* Upgrade target API, build tools and dependencies by [@morckx](https://github.com/morckx) in https://github.com/SecUSo/privacy-friendly-backup-api/pull/10
+
+## New Contributors
+* [@morckx](https://github.com/morckx) made their first contribution in https://github.com/SecUSo/privacy-friendly-backup-api/pull/10
+
+**Full Changelog**: https://github.com/SecUSo/privacy-friendly-backup-api/compare/v1.2.0...v1.3.0
+
+[Changes][v1.3.0]
+
+
 <a name="v1.2.0"></a>
 ## [Backup App Interface Library v1.2.0](https://github.com/SecUSo/privacy-friendly-backup-api/releases/tag/v1.2.0) - 25 May 2023
 
@@ -37,6 +54,7 @@
 [Changes][v1.0.0]
 
 
+[v1.3.0]: https://github.com/SecUSo/privacy-friendly-backup-api/compare/v1.2.0...v1.3.0
 [v1.2.0]: https://github.com/SecUSo/privacy-friendly-backup-api/compare/v1.1.0...v1.2.0
 [v1.1.0]: https://github.com/SecUSo/privacy-friendly-backup-api/compare/v1.0.0...v1.1.0
 [v1.0.0]: https://github.com/SecUSo/privacy-friendly-backup-api/tree/v1.0.0
