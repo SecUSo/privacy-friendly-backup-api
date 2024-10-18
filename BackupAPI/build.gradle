@@ -40,11 +40,15 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'androidx.core:core-ktx:1.13.1'
-    implementation 'androidx.appcompat:appcompat:1.7.0'
+    //androidx.core:core-ktx:1.13.0+ requires minSdk 19 https://developer.android.com/jetpack/androidx/releases/core#1.13.0
+    implementation 'androidx.core:core-ktx:1.12.0'
+    //androidx.appcompat:appcompat:1.7.0+ requires minSdk 21
+    implementation 'androidx.appcompat:appcompat:1.6.1'
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+    //androidx.test.ext:junit:1.2.0+ requires minSdk 19 https://developer.android.com/jetpack/androidx/releases/test#ext.junit-1.2.0
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    //androidx.test.espresso:espresso-core:3.6.0+ requires minSdk 19 https://developer.android.com/jetpack/androidx/releases/test#espresso-3.6.0
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
