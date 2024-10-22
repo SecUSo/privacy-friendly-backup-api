@@ -111,6 +111,9 @@ object AuthenticationHelper {
                     PackageManager.GET_SIGNING_CERTIFICATES
                 ).signingInfo
 
+                if (sig == null) {
+                    return emptyList()
+                }
                 if (sig.hasMultipleSigners()) {
                     sig.apkContentsSigners.map { it.toHex() }
                 } else {
@@ -120,7 +123,7 @@ object AuthenticationHelper {
                 context.packageManager.getPackageInfo(
                     packageName,
                     PackageManager.GET_SIGNATURES
-                ).signatures.map { it.toHex() }
+                ).signatures?.map { it.toHex() } ?: emptyList()
             }
 
         } catch (e: PackageManager.NameNotFoundException) {
