@@ -1,62 +1,76 @@
 # Changelog
 
-<a name="v1.3.0"></a>
-## [Backup App Interface Library v1.3.0](https://github.com/SecUSo/privacy-friendly-backup-api/releases/tag/v1.3.0) - 31 Oct 2023
+<a id="v1.4.0"></a>
+## [Backup App Interface Library v1.4.0](https://github.com/SecUSo/privacy-friendly-backup-api/releases/tag/v1.4.0) - 2024-10-22
 
 ## What's Changed
-* Fix type signature of `writeBackup` in androidTest by [@udenr](https://github.com/udenr) in https://github.com/SecUSo/privacy-friendly-backup-api/pull/11
-* Add CI workflows by [@udenr](https://github.com/udenr) in https://github.com/SecUSo/privacy-friendly-backup-api/pull/12
-* Update gradle and target sdk by [@udenr](https://github.com/udenr) in https://github.com/SecUSo/privacy-friendly-backup-api/pull/13
-* Upgrade target API, build tools and dependencies by [@morckx](https://github.com/morckx) in https://github.com/SecUSo/privacy-friendly-backup-api/pull/10
+* Update workflows by [@udenr](https://github.com/udenr) in [#14](https://github.com/SecUSo/privacy-friendly-backup-api/pull/14)
+* Updates API-Level and small improvements by [@udenr](https://github.com/udenr) in [#15](https://github.com/SecUSo/privacy-friendly-backup-api/pull/15)
+
+
+**Full Changelog**: https://github.com/SecUSo/privacy-friendly-backup-api/compare/v1.3.0...v1.4.0
+
+[Changes][v1.4.0]
+
+
+<a id="v1.3.0"></a>
+## [Backup App Interface Library v1.3.0](https://github.com/SecUSo/privacy-friendly-backup-api/releases/tag/v1.3.0) - 2023-10-31
+
+## What's Changed
+* Fix type signature of `writeBackup` in androidTest by [@udenr](https://github.com/udenr) in [#11](https://github.com/SecUSo/privacy-friendly-backup-api/pull/11)
+* Add CI workflows by [@udenr](https://github.com/udenr) in [#12](https://github.com/SecUSo/privacy-friendly-backup-api/pull/12)
+* Update gradle and target sdk by [@udenr](https://github.com/udenr) in [#13](https://github.com/SecUSo/privacy-friendly-backup-api/pull/13)
+* Upgrade target API, build tools and dependencies by [@morckx](https://github.com/morckx) in [#10](https://github.com/SecUSo/privacy-friendly-backup-api/pull/10)
 
 ## New Contributors
-* [@morckx](https://github.com/morckx) made their first contribution in https://github.com/SecUSo/privacy-friendly-backup-api/pull/10
+* [@morckx](https://github.com/morckx) made their first contribution in [#10](https://github.com/SecUSo/privacy-friendly-backup-api/pull/10)
 
 **Full Changelog**: https://github.com/SecUSo/privacy-friendly-backup-api/compare/v1.2.0...v1.3.0
 
 [Changes][v1.3.0]
 
 
-<a name="v1.2.0"></a>
-## [Backup App Interface Library v1.2.0](https://github.com/SecUSo/privacy-friendly-backup-api/releases/tag/v1.2.0) - 25 May 2023
+<a id="v1.2.0"></a>
+## [Backup App Interface Library v1.2.0](https://github.com/SecUSo/privacy-friendly-backup-api/releases/tag/v1.2.0) - 2023-05-25
 
 ## What's Changed
-* Added the ability to send pfa error back to backup app by [@Kamuno](https://github.com/Kamuno) in https://github.com/SecUSo/privacy-friendly-backup-api/pull/4
-* Fix missing sqlite_sequence table by [@coderPaddyS](https://github.com/coderPaddyS) in https://github.com/SecUSo/privacy-friendly-backup-api/pull/7
-* Remove deprecated plugin 'kotlin-android-extensions' by [@coderPaddyS](https://github.com/coderPaddyS) in https://github.com/SecUSo/privacy-friendly-backup-api/pull/8
-* Remove unused permissions added through androidx.work:work-runtime dependency by [@udenr](https://github.com/udenr) in https://github.com/SecUSo/privacy-friendly-backup-api/pull/9
+* Added the ability to send pfa error back to backup app by [@Kamuno](https://github.com/Kamuno) in [#4](https://github.com/SecUSo/privacy-friendly-backup-api/pull/4)
+* Fix missing sqlite_sequence table by [@coderPaddyS](https://github.com/coderPaddyS) in [#7](https://github.com/SecUSo/privacy-friendly-backup-api/pull/7)
+* Remove deprecated plugin 'kotlin-android-extensions' by [@coderPaddyS](https://github.com/coderPaddyS) in [#8](https://github.com/SecUSo/privacy-friendly-backup-api/pull/8)
+* Remove unused permissions added through androidx.work:work-runtime dependency by [@udenr](https://github.com/udenr) in [#9](https://github.com/SecUSo/privacy-friendly-backup-api/pull/9)
 
 ## New Contributors
-* [@coderPaddyS](https://github.com/coderPaddyS) made their first contribution in https://github.com/SecUSo/privacy-friendly-backup-api/pull/7
-* [@udenr](https://github.com/udenr) made their first contribution in https://github.com/SecUSo/privacy-friendly-backup-api/pull/9
+* [@coderPaddyS](https://github.com/coderPaddyS) made their first contribution in [#7](https://github.com/SecUSo/privacy-friendly-backup-api/pull/7)
+* [@udenr](https://github.com/udenr) made their first contribution in [#9](https://github.com/SecUSo/privacy-friendly-backup-api/pull/9)
 
 **Full Changelog**: https://github.com/SecUSo/privacy-friendly-backup-api/compare/v1.1.0...v1.1.1
 
 [Changes][v1.2.0]
 
 
-<a name="v1.1.0"></a>
-## [Backup App Interface Library v1.1.0](https://github.com/SecUSo/privacy-friendly-backup-api/releases/tag/v1.1.0) - 23 Aug 2022
+<a id="v1.1.0"></a>
+## [Backup App Interface Library v1.1.0](https://github.com/SecUSo/privacy-friendly-backup-api/releases/tag/v1.1.0) - 2022-08-23
 
 ## What's Changed
-* add utility methods to get the correct database version on backup creation by [@Kamuno](https://github.com/Kamuno) in https://github.com/SecUSo/privacy-friendly-backup-api/pull/3
+* add utility methods to get the correct database version on backup creation by [@Kamuno](https://github.com/Kamuno) in [#3](https://github.com/SecUSo/privacy-friendly-backup-api/pull/3)
 
 **Full Changelog**: https://github.com/SecUSo/privacy-friendly-backup-api/compare/v1.0.0...v1.1.0
 
 [Changes][v1.1.0]
 
 
-<a name="v1.0.0"></a>
-## [Backup App Interface Library v1.0.0](https://github.com/SecUSo/privacy-friendly-backup-api/releases/tag/v1.0.0) - 03 Aug 2022
+<a id="v1.0.0"></a>
+## [Backup App Interface Library v1.0.0](https://github.com/SecUSo/privacy-friendly-backup-api/releases/tag/v1.0.0) - 2022-08-03
 
 - Added support for Backup App from F-Droid
 
 [Changes][v1.0.0]
 
 
+[v1.4.0]: https://github.com/SecUSo/privacy-friendly-backup-api/compare/v1.3.0...v1.4.0
 [v1.3.0]: https://github.com/SecUSo/privacy-friendly-backup-api/compare/v1.2.0...v1.3.0
 [v1.2.0]: https://github.com/SecUSo/privacy-friendly-backup-api/compare/v1.1.0...v1.2.0
 [v1.1.0]: https://github.com/SecUSo/privacy-friendly-backup-api/compare/v1.0.0...v1.1.0
 [v1.0.0]: https://github.com/SecUSo/privacy-friendly-backup-api/tree/v1.0.0
 
-<!-- Generated by https://github.com/rhysd/changelog-from-release v3.7.1 -->
+<!-- Generated by https://github.com/rhysd/changelog-from-release v3.8.0 -->
