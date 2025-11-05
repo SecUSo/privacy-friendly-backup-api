@@ -59,5 +59,6 @@ dependencies {
 
     implementation 'androidx.sqlite:sqlite-ktx:2.4.0'
     implementation 'androidx.sqlite:sqlite-framework:2.4.0'
+    implementation 'androidx.sqlite:sqlite-android:2.4.0'
 
 }
